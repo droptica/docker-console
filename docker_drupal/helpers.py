@@ -59,7 +59,9 @@ def message(message, type=""):
         style = bc['OKGREEN'] + bc['BOLD']
     if type == 'white':
         style = bc['ENDC']
-    width, height = _get_terminal_size_linux()
+
+    width = 88
+    height = 23
     signs_length = 10 + len(message)
 
     if signs_length > width:
