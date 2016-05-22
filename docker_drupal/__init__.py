@@ -8,15 +8,15 @@ __version__ = docker_drupal.version.__version__
 
 parser = OptionParser(version=__version__)
 
-args = ["-p", "--docker-run-path", "-s", "--docker-shell-run", "-c",
-        "--docker-container", "-f", "--force-replace-conf", "-e", "--drush-eval-run-code", "-y"]
-
-for i, arg in enumerate(sys.argv):
-    if arg.startswith('-'):
-        arg = arg.split('=')[0].strip()
-        print arg, i
-        dest = "docker_fake_value_" + str(i)
-        parser.add_option(arg, action="store")
+# args = ["-p", "--docker-run-path", "-s", "--docker-shell-run", "-c",
+#         "--docker-container", "-f", "--force-replace-conf", "-e", "--drush-eval-run-code", "-y"]
+#
+# for i, arg in enumerate(sys.argv):
+#     if arg.startswith('-'):
+#         arg = arg.split('=')[0].strip()
+#         print arg, i
+#         dest = "docker_fake_value_" + str(i)
+#         parser.add_option(arg, action="store")
 
 parser.add_option("-p", "--docker-run-path", dest="docker_run_path",
               help="set path do drupal wrapper with 'docker-compose.yml' files and 'docker' folder", metavar="DOCKER_RUN_PATH")

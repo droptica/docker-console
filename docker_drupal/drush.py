@@ -9,10 +9,11 @@ class Drush:
         self.uri = self.config.SITE_URI
         
     def run(self, command):
-        args = self.path
-        if self.uri:
-            args += ' --uri=' + self.uri
-        return run_cmd("drush -r %s %s" % (args, command))
+        return run_cmd("drush -r %s --uri=%s %s " % (self.path, self.uri, command))
+        # args = self.path
+        # if self.uri:
+        #     args += ' --uri=' + self.uri
+        # return run_cmd("drush -r %s %s" % (args, command))
 
     def en(self, name):
         if type(name) in (tuple, list):
