@@ -1,0 +1,7 @@
+include README.rst
+<<<<<<< HEAD
+recursive-include docker_drupal/setup_defaults *
+recursive-include docker_drupal/bash_completion *
+=======
+recursive-include docker_drupal/setup_defaults *
+>>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
