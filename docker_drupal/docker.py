@@ -134,17 +134,8 @@ class Docker:
         self.docker_compose()
 
     def docker_command(self):
-<<<<<<< HEAD
-        if os.environ.get("NO_INTERACTIVE"):
-            return 'docker run --rm %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
-                                            self.config.DEV_DOCKER_IMAGES['default'][0])
-        else:
-            return 'docker run --rm -it %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
-                                            self.config.DEV_DOCKER_IMAGES['default'][0])
-=======
         return 'docker run --rm -it %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
->>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
 
     def tests_run(self):
         if len(self.config.args) > 2:
@@ -153,20 +144,9 @@ class Docker:
             args = ''
         run_cmd('docker run -d --name selenium-test-%s %s %s selenium/standalone-chrome'
                 % (self.base_alias, self._get_links(), self._get_hosts()))
-<<<<<<< HEAD
-        if os.environ.get("NO_INTERACTIVE"):
-            run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html'
-                % (self._get_volumes(), self._get_links(), self._get_hosts(),
-                   self.base_alias, self.config.DEV_DOCKER_IMAGES['default'][0], args))
-        else:
-            run_cmd('docker run --rm -it %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html'
-                % (self._get_volumes(), self._get_links(), self._get_hosts(),
-                   self.base_alias, self.config.DEV_DOCKER_IMAGES['default'][0], args))
-=======
         run_cmd('docker run --rm -it %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html'
             % (self._get_volumes(), self._get_links(), self._get_hosts(),
                self.base_alias, self.config.DEV_DOCKER_IMAGES['default'][0], args))
->>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
 
         run_cmd('docker stop selenium-test-%s' % self.base_alias)
         run_cmd('docker rm selenium-test-%s' % self.base_alias)
@@ -182,7 +162,6 @@ class Docker:
                                                return_output=True)
         return web_container_ip_address
 
-<<<<<<< HEAD
     def get_nginx_proxy_ip(self):
         if not run_cmd('docker ps -q -f name=ngnix-proxy', return_output=True):
             return False
@@ -196,11 +175,6 @@ class Docker:
     def show_nginx_proxy_ip(self):
         print self.get_nginx_proxy_ip()
 
-=======
-    def show_ip(self):
-        print self.get_container_ip()
-
->>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
     def docker_shell(self):
         docker_command = self.docker_command()
         if cmd_options.docker_container:
@@ -277,13 +251,8 @@ class Docker:
 
     def add_entry_to_etc_hosts(self):
         try:
-<<<<<<< HEAD
             nginx_proxy_ip = self.get_nginx_proxy_ip()
             if not nginx_proxy_ip:
-=======
-            web_container_ip_address = self.get_container_ip()
-            if not web_container_ip_address:
->>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
                 raise Exception
 
             with open('/etc/hosts', 'rt') as f:
@@ -293,11 +262,7 @@ class Docker:
                     host_names += ' ' + phpmyadmin_host
                 s = f.read()
                 if not host_names in s:
-<<<<<<< HEAD
                     s += "\n%s\t\t%s\n" % (nginx_proxy_ip, host_names)
-=======
-                    s += "\n%s\t\t%s\n" % (web_container_ip_address, host_names)
->>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
                     with open('/tmp/etc_hosts.tmp', 'wt') as outf:
                         outf.write(s)
 

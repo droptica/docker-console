@@ -33,10 +33,7 @@ build_arrays = {
     'config-prepare': ['docker.config_prepare()'],
     'add-host-to-docker-compose': ['docker.add_host'],
     'show-ip': ['docker.show_ip'],
-<<<<<<< HEAD
     'show-nginx-proxy-ip': ['docker.show_nginx_proxy_ip'],
-=======
->>>>>>> 2b903adeb2f6ef6e32e8780d5ef3584d35b24d6e
     'default': ['print_help'],
     'help': ['print_help'],
 
