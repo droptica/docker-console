@@ -2,6 +2,7 @@ web:
   image: droptica/drupal-apache:xdebug
   volumes:
     - ./app:/var/www/html
+#    - ./docker/php.ini:/usr/local/etc/php/conf.d/php.ini:ro # enable xdebug
   links:
     - mysql:mysql
   environment:
