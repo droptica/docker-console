@@ -23,7 +23,7 @@ DRUPAL_LOCATION = "app"
 
 SITE_DIRECTORY = "default"
 
-SITE_URI = "dockertest.dev"
+SITE_URI = "default"
 
 DRUPAL_ADMIN_USER = 'oitadmin'
 
