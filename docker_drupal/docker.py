@@ -19,7 +19,7 @@ class Docker:
             env = '-' + self.config.ENV
         else:
             env = ''
-        self.compose_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '.yml')
+        self.compose_path = os.path.join(self.config.BUILD_PATH, 'docker-compose.yml')
         if not os.path.exists(self.compose_path) and self.config.steps_key not in ('default', 'init', 'help', 'refresh-autocomplete', 'cleanup'):
             message('docker-compose.yml file is missing. To run docker-drupal you need to do one of this things:\n'
                         'go to project wrapper path, \n'
@@ -29,16 +29,6 @@ class Docker:
         self.compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '-template.yml')
         self.base_alias = "".join(re.findall("[a-zA-Z]+", os.path.basename(self.config.BUILD_PATH))).lower()
 
-    def _fill_config_template(self, replacments):
-        config_file = open(self.compose_template_path, 'r')
-        content = config_file.read()
-        config_file.close()
-        for old, new in replacments:
-            content = content.replace(old, new)
-        config_file = open(self.compose_path, 'w')
-        config_file.write(content)
-        config_file.close()
-
     def docker_chown(self, path, uid):
         return self.docker_run('chown -Rf %s:%s %s' % (uid, uid, path))
 
@@ -46,8 +36,21 @@ class Docker:
         return self.docker_run('chmod -Rf 777 %s' % path)
 
     def config_prepare(self):
-        host = os.environ.get("HOST")
-        self._fill_config_template(['{{HOST}}', host])
+        if not os.path.isfile(self.compose_template_path):
+            return
+        config_file = open(self.compose_template_path, 'r')
+        content = config_file.read()
+        config_file.close()
+        replacments = re.findall('{{([^{]+)}}', content)
+        if replacments is not None:
+            for replace in replacments:
+                env = os.environ.get(replace.strip())
+                if not env:
+                    env = ''
+                content = content.replace("{{%s}}" % replace, env)
+        config_file = open(self.compose_path, 'w')
+        config_file.write(content)
+        config_file.close()
 
     def _get_links(self):
         docker_comose = open(self.compose_path)

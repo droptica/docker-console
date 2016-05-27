@@ -30,7 +30,7 @@ build_arrays = {
                         'drush.run("cc all")', 'drush.run("uli")'],
 
     'drush': ['docker.drush_run'],
-    'config-prepare': ['docker.config_prepare()'],
+    'config-prepare': ['docker.config_prepare'],
     'add-host-to-docker-compose': ['docker.add_host'],
     'show-ip': ['docker.show_ip'],
     'show-nginx-proxy-ip': ['docker.show_nginx_proxy_ip'],

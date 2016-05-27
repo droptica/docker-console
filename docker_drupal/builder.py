@@ -19,6 +19,11 @@ class Builder:
 
     def __init__(self, config):
         self.config = config
+        dotenv_path = os.path.join(self.config.BUILD_PATH, '.env')
+        if os.path.isfile(dotenv_path):
+            load_dotenv(dotenv_path)
+        self.config.ENV = os.environ.get("ENV")
+        self.config.SITE_URI = os.environ.get("SITE_URI")
         self.config.args = sys.argv
         self.now = datetime.datetime.now()
         self.config.TIME_STR = self.now.strftime("%Y-%m-%d.%H.%M")
@@ -27,11 +32,7 @@ class Builder:
         self.database = Database(self.config, self.drush)
         self.docker = Docker(self.config)
         self.archive = Archive(self.config)
-        dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-        if os.path.isfile(dotenv_path):
-            load_dotenv(dotenv_path)
-        self.config.ENV = os.environ.get("ENV")
-        self.config.SITE_URI = os.environ.get("SITE_URI")
+
 
     def chmod_files(self):
         run_cmd('chmod 777 -Rf %s' % os.path.join(self.config.DRUPAL_ROOT, self.config.FILES_DST, 'files'))
