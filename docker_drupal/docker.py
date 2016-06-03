@@ -137,7 +137,11 @@ class Docker:
         self.docker_compose()
 
     def docker_command(self):
-        return 'docker run --rm -it %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
+        if self.config.NO_INTERACTIVE:
+            return 'docker run --rm %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
+                                                        self.config.DEV_DOCKER_IMAGES['default'][0])
+        else:
+            return 'docker run --rm -it %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
 
     def tests_run(self):
