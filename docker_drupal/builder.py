@@ -23,7 +23,8 @@ class Builder:
         if os.path.isfile(dotenv_path):
             load_dotenv(dotenv_path)
         self.config.ENV = os.environ.get("ENV")
-        self.config.SITE_URI = os.environ.get("SITE_URI")
+        if os.environ.get("SITE_URI"):
+            self.config.SITE_URI = os.environ.get("SITE_URI")
         self.config.NO_INTERACTIVE = os.environ.get("NO_INTERACTIVE")
         self.config.args = sys.argv
         self.now = datetime.datetime.now()
