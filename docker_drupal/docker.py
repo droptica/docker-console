@@ -29,19 +29,19 @@ class Docker:
         self.compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '-template.yml')
         self.base_alias = self.get_project_name(self.config.BUILD_PATH)
 
-        def get_project_name(working_dir, project_name=None):
-            def normalize_name(name):
-                return re.sub(r'[^a-z0-9]', '', name.lower())
+    def get_project_name(self, working_dir, project_name=None):
+        def normalize_name(name):
+            return re.sub(r'[^a-z0-9]', '', name.lower())
 
-            project_name = project_name or os.environ.get('COMPOSE_PROJECT_NAME')
-            if project_name:
-                return normalize_name(project_name)
+        project_name = project_name or os.environ.get('COMPOSE_PROJECT_NAME')
+        if project_name:
+            return normalize_name(project_name)
 
-            project = os.path.basename(os.path.abspath(working_dir))
-            if project:
-                return normalize_name(project)
+        project = os.path.basename(os.path.abspath(working_dir))
+        if project:
+            return normalize_name(project)
 
-            return 'default'
+        return 'default'
 
     def docker_chown(self, path, uid):
         return self.docker_run('chown -Rf %s:%s %s' % (uid, uid, path))
