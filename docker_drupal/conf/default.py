@@ -11,11 +11,15 @@ DB_PASSWORD = "pass"
 
 DBHOST = "mysql"
 
-DBDUMP_FILE = "database.sql.tar.gz"
+DBDUMP_FILE = "databases/database.sql.tar.gz"
 
 FILES_DST = "sites/default/"
 
-FILES_ARCHIVE = "files.tar.gz"
+FILES_ARCHIVE = "files/files.tar.gz"
+
+PRIVATE_FILES_ARCHIVE = "files/private.tar.gz"
+
+PRIVATE_FILES_DST = "sites/default/files/"
 
 TMP_PATH = "/tmp"
 

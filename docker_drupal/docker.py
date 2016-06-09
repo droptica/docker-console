@@ -27,7 +27,21 @@ class Docker:
                         'create alias with your project wrapper path in ~/.docker_drupal/aliases (then docker-drupal @project_dev)', 'warning')
             exit(0)
         self.compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '-template.yml')
-        self.base_alias = "".join(re.findall("[a-zA-Z]+", os.path.basename(self.config.BUILD_PATH))).lower()
+        self.base_alias = self.get_project_name(self.config.BUILD_PATH)
+
+        def get_project_name(working_dir, project_name=None):
+            def normalize_name(name):
+                return re.sub(r'[^a-z0-9]', '', name.lower())
+
+            project_name = project_name or os.environ.get('COMPOSE_PROJECT_NAME')
+            if project_name:
+                return normalize_name(project_name)
+
+            project = os.path.basename(os.path.abspath(working_dir))
+            if project:
+                return normalize_name(project)
+
+            return 'default'
 
     def docker_chown(self, path, uid):
         return self.docker_run('chown -Rf %s:%s %s' % (uid, uid, path))
@@ -85,10 +99,22 @@ class Docker:
         #     volumes.append('-v %s:%s:ro' % (os.path.join(self.config.HOME_PATH, '.gitconfig'), '/root/.gitconfig'))
         # if os.path.isdir(os.path.join(self.config.HOME_PATH, '.ssh')):
         #     volumes.append('-v %s:%s:ro' % (os.path.join(self.config.HOME_PATH, '.ssh'), '/root/.ssh'))
-        db_path = os.path.join(self.config.BUILD_PATH, 'databases', self.config.DBDUMP_FILE)
-        if os.path.islink(db_path):
+        db_path = os.path.join(self.config.BUILD_PATH, self.config.DBDUMP_FILE)
+        if db_path and os.path.islink(db_path):
             real_db_path = os.path.realpath(db_path)
-            volumes.append('-v %s:%s' % (real_db_path, os.path.join('/app/databases', self.config.DBDUMP_FILE)))
+            volumes.append('-v %s:%s' % (real_db_path, db_path.replace(self.config.BUILD_PATH, '/app/')))
+
+        files_path = os.path.join(self.config.BUILD_PATH, self.config.DBDUMP_FILE)
+        if files_path and os.path.islink(files_path):
+            real_files_path = os.path.realpath(files_path)
+            volumes.append('-v %s:%s' % (real_files_path, files_path.replace(self.config.BUILD_PATH, '/app/')))
+
+        private_files_path = os.path.join(self.config.BUILD_PATH, self.config.DBDUMP_FILE)
+        if private_files_path and os.path.islink(private_files_path):
+            real_private_files_path = os.path.realpath(private_files_path)
+            volumes.append('-v %s:%s' % (real_private_files_path,
+                                         private_files_path.replace(self.config.BUILD_PATH, '/app/')))
+
         volumes.append('-v %s:%s' % (self.config.BUILD_PATH, '/app'))
         return ' '.join(volumes)
 

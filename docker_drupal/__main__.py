@@ -45,8 +45,8 @@ try:
 except:
     pass
 
-def build_array(key):
 
+def build_array(key):
     if key in build_arrays:
         return build_arrays[key]
     else:
@@ -55,7 +55,6 @@ def build_array(key):
 
 
 def main():
-
     steps_key = 'default'
     if len(args) > 0:
         steps_key = args[0]
