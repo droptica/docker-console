@@ -104,12 +104,12 @@ class Docker:
             real_db_path = os.path.realpath(db_path)
             volumes.append('-v %s:%s' % (real_db_path, db_path.replace(self.config.BUILD_PATH, '/app/')))
 
-        files_path = os.path.join(self.config.BUILD_PATH, self.config.DBDUMP_FILE)
+        files_path = os.path.join(self.config.BUILD_PATH, self.config.FILES_ARCHIVE)
         if files_path and os.path.islink(files_path):
             real_files_path = os.path.realpath(files_path)
             volumes.append('-v %s:%s' % (real_files_path, files_path.replace(self.config.BUILD_PATH, '/app/')))
 
-        private_files_path = os.path.join(self.config.BUILD_PATH, self.config.DBDUMP_FILE)
+        private_files_path = os.path.join(self.config.BUILD_PATH, self.config.PRIVATE_FILES_ARCHIVE)
         if private_files_path and os.path.islink(private_files_path):
             real_private_files_path = os.path.realpath(private_files_path)
             volumes.append('-v %s:%s' % (real_private_files_path,
