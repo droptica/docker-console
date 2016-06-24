@@ -29,7 +29,7 @@ SITE_DIRECTORY = "default"
 
 SITE_URI = "default"
 
-DRUPAL_ADMIN_USER = 'oitadmin'
+DRUPAL_ADMIN_USER = 'admin'
 
 DRUPAL_ADMIN_PASS = '123'
 
