@@ -18,9 +18,10 @@ args = ["-p", "--docker-run-path",
 for i, arg in enumerate(sys.argv):
     if arg.startswith('-'):
         arg = arg.split('=')[0].strip()
-        print arg, i
-        dest = "docker_fake_value_" + str(i)
-        parser.add_option(arg, action="store")
+        if not arg in args:
+            print "Additional args: " + arg
+            dest = "docker_fake_value_" + str(i)
+            parser.add_option(arg, action="store")
 
 parser.add_option("-p", "--docker-run-path", dest="docker_run_path",
               help="set path do drupal wrapper with 'docker-compose.yml' files and 'docker' folder", metavar="DOCKER_RUN_PATH")
