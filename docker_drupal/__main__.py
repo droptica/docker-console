@@ -36,7 +36,7 @@ build_arrays = {
     'show-nginx-proxy-ip': ['docker.show_nginx_proxy_ip'],
     'default': ['print_help'],
     'help': ['print_help'],
-
+    'test' : ['docker.tests_run'],
     'cleanup': ['docker.cleanup'],
 }
 

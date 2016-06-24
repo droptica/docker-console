@@ -3,7 +3,7 @@ import re
 import yaml
 import tempfile
 import uuid
-
+import time
 import shutil
 from distutils import dir_util
 from .helpers import run as run_cmd, call as call_cmd, message
@@ -177,6 +177,8 @@ class Docker:
             args = ''
         run_cmd('docker run -d --name selenium-test-%s %s %s selenium/standalone-chrome'
                 % (self.base_alias, self._get_links(), self._get_hosts()))
+        print "Waitng 5 sec."
+        time.sleep(5)
         run_cmd('docker run --rm -it %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html'
             % (self._get_volumes(), self._get_links(), self._get_hosts(),
                self.base_alias, self.config.DEV_DOCKER_IMAGES['default'][0], args))
