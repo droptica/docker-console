@@ -39,6 +39,7 @@ HOME_PATH = os.path.expanduser('~')
 
 DEV_DOCKER_IMAGES = {
     'default': ('droptica/drupal-dev', None),
+    'testing_image': ('droptica/codecept', None),
     'additional_images': [
         # ('droptica/additional_image', 'path_to_dockerfile')
     ]

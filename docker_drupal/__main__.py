@@ -15,14 +15,19 @@ build_arrays = {
     'refresh-autocomplete': ['docker.refresh_autocomplete'],
     'shell': ['docker.docker_shell'],
 
-    'start': ['docker.docker_compose', 'chmod_files'],
-    'up': ['docker.docker_compose', 'chmod_files'],
+    'start': ['docker.docker_up', 'chmod_files'],
+    'up': ['docker.docker_up', 'chmod_files'],
+    'update-images': ['docker.docker_compose', 'chmod_files'],
+
     'stop': ['docker.docker_stop'],
+    'rm': ['docker.docker_stop', 'docker.docker_rm'],
+    'rmi': ['docker.docker_stop', 'docker.docker_rm', 'docker.docker_rmi'],
+
     'restart': ['docker.docker_restart', 'chmod_files'],
 
     'build': ['confirm_action', 'docker.docker_run("docker-drupal build-in-docker")',
               'docker.chown', 'docker.setfacl', 'chmod_files'],
-    'up-and-build': ['confirm_action', 'docker.docker_compose', 'docker.docker_run("docker-drupal build-in-docker")',
+    'up-and-build': ['confirm_action', 'docker.docker_up', 'docker.docker_run("docker-drupal build-in-docker")',
                      'docker.chown', 'docker.setfacl', 'chmod_files'],
 
     'build-in-docker': ['drupal_settings.copy_settings', 'database.drop_db', 'database.create_db', 'database.import_db',
@@ -38,6 +43,7 @@ build_arrays = {
     'help': ['print_help'],
     'test' : ['docker.tests_run'],
     'cleanup': ['docker.cleanup'],
+    'dump': ['docker.docker_create_dump'],
 }
 
 try:

@@ -5,6 +5,7 @@ import tempfile
 import uuid
 import time
 import shutil
+import tarfile
 from distutils import dir_util
 from .helpers import run as run_cmd, call as call_cmd, message
 from .autocomplete import setup_autocomplete
@@ -89,6 +90,9 @@ class Docker:
                 for host in docker_config[container]['environment']['VIRTUAL_HOST'].split(','):
                     hosts.append('--link %s:%s' % ('%s_%s_1' % (self.base_alias, container),
                                                    host.strip()))
+                hosts.append('--link %s:%s' % ('%s_%s_1' % (self.base_alias, container),
+                                               container))
+
             except:
                 pass
         return ' '.join(hosts)
@@ -138,6 +142,20 @@ class Docker:
     def docker_drush(self, cmd=''):
         self.docker_run('drush -r %s %s' % (os.path.join('/app', self.config.DRUPAL_LOCATION), cmd))
 
+    def docker_create_dump(self):
+        filename = 'database_dump_' + self.config.TIME_STR + '.sql'
+        dump_path = os.path.join(self.config.BUILD_PATH, 'databases', filename)
+        self.docker_run('drush -r %s %s' %
+                        (os.path.join('/app', self.config.DRUPAL_LOCATION),
+                         'sql-dump >%s' % dump_path))
+        tar = tarfile.open(dump_path + '.tar.gz', 'w:gz')
+        tar.add(dump_path, filename)
+        tar.close()
+        os.remove(dump_path)
+
+    def docker_up(self):
+        run_cmd('docker-compose up -d', cwd=self.config.BUILD_PATH)
+
     def docker_compose(self):
         run_cmd('docker-compose stop', cwd=self.config.BUILD_PATH)
         run_cmd('docker-compose rm -f', cwd=self.config.BUILD_PATH)
@@ -145,6 +163,9 @@ class Docker:
         run_cmd('docker-compose build', cwd=self.config.BUILD_PATH)
 
         ALL_DEV_DOCKER_IMAGES = [self.config.DEV_DOCKER_IMAGES['default']] + self.config.DEV_DOCKER_IMAGES['additional_images']
+
+        if 'testing_image' in self.config.DEV_DOCKER_IMAGES:
+            ALL_DEV_DOCKER_IMAGES.append(self.config.DEV_DOCKER_IMAGES['testing_image'])
 
         for DEV_DOCKER_IMAGE, DEV_DOCKER_IMAGE_DOCKERFILE in ALL_DEV_DOCKER_IMAGES:
             run_cmd('docker pull %s' % DEV_DOCKER_IMAGE)
@@ -157,7 +178,23 @@ class Docker:
 
     def docker_stop(self):
         run_cmd('docker-compose stop', cwd=self.config.BUILD_PATH)
+
+    def docker_rm(self):
         run_cmd('docker-compose rm -f', cwd=self.config.BUILD_PATH)
+
+    def docker_rmi(self):
+        docker_comose = open(self.compose_path)
+        docker_config = yaml.load(docker_comose)
+        docker_comose.close()
+        images_to_remove = []
+        for container in docker_config:
+            config = docker_config[container]
+            if 'image' in config:
+                images_to_remove.append(docker_config[container]['image'])
+            elif 'build' in config:
+                images_to_remove.append('%s_%s' % (self.base_alias, container))
+
+        run_cmd('docker rmi %s' % (' ' .join(images_to_remove)), cwd=self.config.BUILD_PATH)
 
     def docker_restart(self):
         self.docker_compose()
@@ -179,10 +216,12 @@ class Docker:
                 % (self.base_alias, self._get_links(), self._get_hosts()))
         print "Waitng 5 sec."
         time.sleep(5)
-        run_cmd('docker run --rm -it %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html'
+        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept clean'
             % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               self.base_alias, self.config.DEV_DOCKER_IMAGES['default'][0], args))
-
+               self.base_alias, self.config.CODECEPT_IMAGE))
+        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html --xml'
+            % (self._get_volumes(), self._get_links(), self._get_hosts(),
+               self.base_alias, self.config.CODECEPT_IMAGE, args))
         run_cmd('docker stop selenium-test-%s' % self.base_alias)
         run_cmd('docker rm selenium-test-%s' % self.base_alias)
         self.docker_command()
