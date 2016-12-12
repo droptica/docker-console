@@ -16,7 +16,9 @@ Requirements for docker-drupal:
 * Python 2.7
 * setuptools
 * pyyaml
+
 |
+
 * docker
 * docker-compose
 
@@ -65,6 +67,7 @@ without logging out.
     Default action if no command spefified. This command is equivalent to::
 
         docker-drupal
+
     and::
 
         docker-drupal help
@@ -76,6 +79,7 @@ without logging out.
     If you use --help option, you will not see available commands, but you can always use::
 
         docker-drupal <tab><tab>
+
     to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in docker_drupal_overrides.py.
 
     |
@@ -83,9 +87,11 @@ without logging out.
     This command is equivalent to::
 
         docker-drupal
+
     and::
 
         docker-drupal default
+
 |
 
 - init:
@@ -95,6 +101,7 @@ without logging out.
         - docker/my.conf,
         - docker/docker_drupal/docker_drupal_overrides.py,
         - docker/docker_drupal/docker_drupal_config_overrides.py
+
     Files existing in project wrapper localization, by default will not be replaced.
 
     |
@@ -110,6 +117,7 @@ without logging out.
 - cleanup:
     | This command is running three commands that are cleaning up unneeded docker containers, images and volumes.
     | See http://blog.yohanliyanage.com/2015/05/docker-clean-up-after-yourself/ for precise description.
+
 |
 
 - refresh-autocomplete:
@@ -117,6 +125,7 @@ without logging out.
     After that command you need to logout and login again, or run::
 
         exec bash
+
     command to apply autocomplete changes.
 
 |
@@ -133,7 +142,9 @@ without logging out.
 
     \-c, \--docker-container
         Set container name to run bash in it.
+
     |
+
     \-s, \--docker-shell-run
         Set if you want to run docker shell.
 
@@ -146,6 +157,7 @@ without logging out.
 
 - add-host-to-etc-hosts:
     | Add config entry for project to /etc/hosts depending on VIRTUAL_HOST variable for web and phpmyadmin containers configuration in docker-compose.yml.
+
     Example of /etc/hosts entry for project::
 
         172.17.0.2		project.dev www.project.dev phpmyadmin.project.dev
@@ -242,6 +254,7 @@ without logging out.
     See help for docker-drupal, you can also use::
 
         docker-drupal help
+
     command
 
 |
@@ -277,6 +290,7 @@ To initialize docker-drupal in drupal project you can either manually create fol
 , or run::
 
     docker-drupal init
+
 command. This command will copy this files and some other additional files:
 
 - docker-compose-jenkins.yml,
@@ -290,6 +304,7 @@ you should **look at the source of docker_drupal package conf/default.py** file 
 After that, you should adjust settings for your project in::
 
     <project_name>/docker/docker_drupal/docker_drupal_config_overrides.py
+
 file if needed.
 
 
@@ -317,6 +332,7 @@ docker-drupal application allows for defining project aliases like in drush. In 
 Alias files have to be placed in::
 
     ~/.docker_drupal/aliases/
+
 folder. This folder is automatically created during installation. You can place here as many aliases files as you need, with any number of aliases in each file.
 
 |
@@ -344,13 +360,14 @@ If you will create alias for project you will be able to run docker-drupal from 
 After adding new aliases, you need to run::
 
     docker-drupal refresh-autocomplete
+
 to add autocomplete support for new aliases.
 
 
 |
 
 **Adjusting default, global configuration options, classes methods and commands to specific project needs, using custom overriding files**
-=======================================================================================================================================
+==========================================================================================================================================
 
 |
 
@@ -360,6 +377,7 @@ to add autocomplete support for new aliases.
 To adjust configuration options you need to modify::
 
     <project_name>/docker/docker_drupal/docker_drupal_config_overrides.py
+
 file.
 
 |
@@ -386,6 +404,7 @@ Example docker_drupal_config_overrides.py file::
 To adjust classes methods or commands you need to modify::
 
     <project_name>/docker/docker_drupal/docker_drupal_overrides.py
+
 file.
 
 You can either replace existing classes methods or add new methods. Methods from classes can be used create new or replace existing commands locally in project context.
