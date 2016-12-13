@@ -21,7 +21,7 @@ class Docker:
         else:
             env = ''
         self.compose_path = os.path.join(self.config.BUILD_PATH, 'docker-compose.yml')
-        if not os.path.exists(self.compose_path) and self.config.steps_key not in ('default', 'init', 'help', 'refresh-autocomplete', 'cleanup'):
+        if not os.path.exists(self.compose_path) and self.config.steps_key not in ('default', 'init', 'help', 'refresh-autocomplete', 'cleanup', 'show-nginx-proxy-ip'):
             message('docker-compose.yml file is missing. To run docker-drupal you need to do one of this things:\n'
                         'go to project wrapper path, \n'
                         'specify absolute path to project wrapper by -p (--docker-run-path) option\n'
@@ -77,9 +77,6 @@ class Docker:
                     if key not in links:
                         links.append(key)
         return ' '.join(['--link ' + self._container_alias(x) for x in links])
-        # if test:
-        #     ret += ' --link selenium-test:selenium'
-        # return ret
 
     def _get_hosts(self):
         docker_comose = open(self.compose_path)
@@ -156,16 +153,18 @@ class Docker:
     def docker_up(self):
         run_cmd('docker-compose up -d', cwd=self.config.BUILD_PATH)
 
-    def docker_compose(self):
+    def docker_update_images(self):
         run_cmd('docker-compose stop', cwd=self.config.BUILD_PATH)
         run_cmd('docker-compose rm -f', cwd=self.config.BUILD_PATH)
         run_cmd('docker-compose pull', cwd=self.config.BUILD_PATH)
         run_cmd('docker-compose build', cwd=self.config.BUILD_PATH)
 
-        ALL_DEV_DOCKER_IMAGES = [self.config.DEV_DOCKER_IMAGES['default']] + self.config.DEV_DOCKER_IMAGES['additional_images']
-
-        if 'testing_image' in self.config.DEV_DOCKER_IMAGES:
-            ALL_DEV_DOCKER_IMAGES.append(self.config.DEV_DOCKER_IMAGES['testing_image'])
+        ALL_DEV_DOCKER_IMAGES = []
+        for image in self.config.DEV_DOCKER_IMAGES:
+            if isinstance(self.config.DEV_DOCKER_IMAGES[image], tuple):
+                ALL_DEV_DOCKER_IMAGES.append(self.config.DEV_DOCKER_IMAGES[image])
+            elif isinstance(self.config.DEV_DOCKER_IMAGES[image], list):
+                ALL_DEV_DOCKER_IMAGES += self.config.DEV_DOCKER_IMAGES[image]
 
         for DEV_DOCKER_IMAGE, DEV_DOCKER_IMAGE_DOCKERFILE in ALL_DEV_DOCKER_IMAGES:
             run_cmd('docker pull %s' % DEV_DOCKER_IMAGE)
@@ -197,7 +196,8 @@ class Docker:
         run_cmd('docker rmi %s' % (' ' .join(images_to_remove)), cwd=self.config.BUILD_PATH)
 
     def docker_restart(self):
-        self.docker_compose()
+        self.docker_stop()
+        self.docker_up()
 
     def docker_command(self):
         if self.config.NO_INTERACTIVE:
@@ -208,20 +208,23 @@ class Docker:
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
 
     def tests_run(self):
+        if ('selenium_image' not in self.config.DEV_DOCKER_IMAGES) or ('codecept_image' not in self.config.DEV_DOCKER_IMAGES):
+            message('selenium_image or codecept_image is missing in DEV_DOCKER_IMAGES config.', 'error')
+            exit(0)
         if len(self.config.args) > 2:
             args = 'tests/' + ' '.join(self.config.args[2:])
         else:
             args = ''
-        run_cmd('docker run -d --name selenium-test-%s %s %s selenium/standalone-chrome'
-                % (self.base_alias, self._get_links(), self._get_hosts()))
+        run_cmd('docker run -d --name selenium-test-%s %s %s %s'
+                % (self.base_alias, self._get_links(), self._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
         print "Waitng 5 sec."
         time.sleep(5)
-        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept clean'
+        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w %s %s codecept clean'
             % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               self.base_alias, self.config.CODECEPT_IMAGE))
-        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w /app/tests/ %s codecept run %s --html --xml'
+               self.base_alias, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0]))
+        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w %s %s codecept run %s --html --xml'
             % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               self.base_alias, self.config.CODECEPT_IMAGE, args))
+               self.base_alias, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], args))
         run_cmd('docker stop selenium-test-%s' % self.base_alias)
         run_cmd('docker rm selenium-test-%s' % self.base_alias)
         self.docker_command()
@@ -230,16 +233,16 @@ class Docker:
         web_container_alias = self._container_alias("web:web").split(':')[0]
         if not run_cmd('docker ps -q -f name=%s' % web_container_alias, return_output=True):
             message("Docker is not up for this project and it will be started. It is required to add config entry to /etc/hosts.", 'info')
-            self.docker_compose()
+            self.docker_up()
         web_container_ip_address = run_cmd('docker inspect --format "{{ .NetworkSettings.IPAddress }}" %s'
                                                % web_container_alias,
                                                return_output=True)
         return web_container_ip_address
 
     def get_nginx_proxy_ip(self):
-        if not run_cmd('docker ps -q -f name=ngnix-proxy', return_output=True):
+        if not run_cmd('docker ps -q -f name=nginx-proxy', return_output=True):
             return False
-        container_ip_address = run_cmd('docker inspect --format "{{ .NetworkSettings.IPAddress }}" ngnix-proxy',
+        container_ip_address = run_cmd('docker inspect --format "{{ .NetworkSettings.IPAddress }}" nginx-proxy',
                                                return_output=True)
         return container_ip_address
 

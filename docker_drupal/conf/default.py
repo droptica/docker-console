@@ -25,6 +25,8 @@ TMP_PATH = "/tmp"
 
 DRUPAL_LOCATION = "app"
 
+TESTS_LOCATION = "tests"
+
 SITE_DIRECTORY = "default"
 
 SITE_URI = "default"
@@ -39,7 +41,8 @@ HOME_PATH = os.path.expanduser('~')
 
 DEV_DOCKER_IMAGES = {
     'default': ('droptica/drupal-dev', None),
-    'testing_image': ('droptica/codecept', None),
+    'selenium_image': ('selenium/standalone-chrome', None),
+    'codecept_image': ('droptica/codecept', None),
     'additional_images': [
         # ('droptica/additional_image', 'path_to_dockerfile')
     ]

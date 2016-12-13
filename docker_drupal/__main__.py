@@ -17,7 +17,7 @@ build_arrays = {
 
     'start': ['docker.docker_up', 'chmod_files'],
     'up': ['docker.docker_up', 'chmod_files'],
-    'update-images': ['docker.docker_compose', 'chmod_files'],
+    'update-images': ['docker.docker_update_images', 'chmod_files'],
 
     'stop': ['docker.docker_stop'],
     'rm': ['docker.docker_stop', 'docker.docker_rm'],
