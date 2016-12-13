@@ -31,8 +31,7 @@ build_arrays = {
                      'docker.chown', 'docker.setfacl', 'chmod_files'],
 
     'build-in-docker': ['drupal_settings.copy_settings', 'database.drop_db', 'database.create_db', 'database.import_db',
-                        'drush.run("fra -y")', 'drush.run("-y updb")', 'drush.en("devel")', 'drush.run("fra -y")',
-                        'drush.run("cc all")', 'drush.run("uli")'],
+                        'drush.en("devel")', 'drush.run("cc all")', 'drush.run("uli")'],
 
     'drush': ['docker.drush_run'],
     'config-prepare': ['docker.config_prepare'],
