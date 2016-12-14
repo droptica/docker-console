@@ -25,9 +25,9 @@ build_arrays = {
 
     'restart': ['docker.docker_restart', 'chmod_files'],
 
-    'build': ['confirm_action', 'docker.docker_run("docker-drupal build-in-docker")',
+    'build': ['confirm_action', 'docker.docker_run("docker-console build-in-docker")',
               'docker.chown', 'docker.setfacl', 'chmod_files'],
-    'up-and-build': ['confirm_action', 'docker.docker_up', 'docker.docker_run("docker-drupal build-in-docker")',
+    'up-and-build': ['confirm_action', 'docker.docker_up', 'docker.docker_run("docker-console build-in-docker")',
                      'docker.chown', 'docker.setfacl', 'chmod_files'],
 
     'build-in-docker': ['drupal_settings.copy_settings', 'database.drop_db', 'database.create_db', 'database.import_db',

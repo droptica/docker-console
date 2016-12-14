@@ -1,6 +1,6 @@
 #import classes to override
-from docker_drupal.drush import Drush
-from docker_drupal.builder import Builder
+from docker_console.drush import Drush
+from docker_console.builder import Builder
 
 # add new methods
 class DrushLocal:

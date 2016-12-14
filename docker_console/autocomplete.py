@@ -3,7 +3,7 @@ from .aliases import __all__ as available_aliases
 
 
 def get_available_commands():
-    from docker_drupal.__main__ import build_arrays
+    from docker_console.__main__ import build_arrays
     from copy import deepcopy
     build_arrays_cpy = deepcopy(build_arrays)
     del build_arrays_cpy['build-in-docker']
@@ -11,7 +11,7 @@ def get_available_commands():
 
 def get_commands_completion_functions():
     return """
-_docker_drupal_init() {
+_docker_console_init() {
 	case "$cur" in
 		-*)
 			COMPREPLY=( $( compgen -W "-f --force-replace-conf" -- "$cur" ) )
@@ -19,7 +19,7 @@ _docker_drupal_init() {
 	esac
 }
 
-_docker_drupal_shell() {
+_docker_console_shell() {
 	case "$cur" in
 		-*)
 			COMPREPLY=( $( compgen -W "-s --docker-shell-run -c --docker-container" -- "$cur" ) )
@@ -27,7 +27,7 @@ _docker_drupal_shell() {
 	esac
 }
 
-_docker_drupal_drush() {
+_docker_console_drush() {
 	case "$cur" in
 		-*)
 			COMPREPLY=( $( compgen -W "-e --drush-eval-run" -- "$cur" ) )
@@ -64,6 +64,6 @@ def setup_autocomplete():
             with open('/tmp/bash_completion.tmp', 'wt') as outf:
               outf.write(content)
 
-            os.system('sudo mv /tmp/bash_completion.tmp /usr/share/bash-completion/completions/docker-drupal')
+            os.system('sudo mv /tmp/bash_completion.tmp /usr/share/bash-completion/completions/docker-console')
     except:
           pass

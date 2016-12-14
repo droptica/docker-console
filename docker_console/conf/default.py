@@ -53,11 +53,11 @@ SETTINGS_DIR = None
 ENV = None
 
 try:
-    from docker_drupal_config_overrides import *
+    from config_overrides import *
 except Exception as exception:
-    if "No module named docker_drupal_config_overrides" in str(exception):
+    if "No module named config_overrides" in str(exception):
         pass
     else:
-        print "Error during docker_drupal_config_overrides file import: ", exception
+        print "Error during config_overrides file import: ", exception
 
 DRUPAL_ROOT = os.path.realpath(os.path.join(BUILD_PATH, DRUPAL_LOCATION))

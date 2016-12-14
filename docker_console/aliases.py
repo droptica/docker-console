@@ -3,7 +3,7 @@ import importlib
 
 __all__ = []
 aliases = {}
-aliases_home_dir = os.path.join(os.path.expanduser('~'), '.docker_drupal', 'aliases')
+aliases_home_dir = os.path.join(os.path.expanduser('~'), '.docker_console', 'aliases')
 sys.path.append(aliases_home_dir)
 
 if(os.path.isdir(aliases_home_dir)):

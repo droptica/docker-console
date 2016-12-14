@@ -2,9 +2,9 @@ import os
 import sys
 from optparse import OptionParser, OptionGroup
 from .aliases import __all__ as available_aliases, aliases
-import docker_drupal.version
+import docker_console.version
 
-__version__ = docker_drupal.version.__version__
+__version__ = docker_console.version.__version__
 
 parser = OptionParser(version=__version__)
 
@@ -36,7 +36,7 @@ parser.add_option("-c", "--docker-container", dest="docker_container",
 parser.add_option("-f", "--force-replace-conf", action="store_true", dest="docker_init_replace_conf",
               help="Use with action 'init'. "
                    "Set if you want force replace your existing config files "
-                   "docker-compose.yml, docker-compose-jenkins.yml, docker/my.conf, docker/docker_drupal/docker_drupal_overrides.py and docker/docker_drupal/docker_drupal_config_overrides.py."
+                   "docker-compose.yml, docker-compose-jenkins.yml, docker/my.conf, docker/docker_console/func_overrides.py and docker/docker_console/config_overrides.py."
                    "All your changes in listed files will be irrevocably lost. Other files in wrapper folder and 'docker' folder will stay unchanged.",)
 
 parser.add_option("-e", "--drush-eval-run-code", dest="docker_drush_eval_run_code",
@@ -69,12 +69,12 @@ for idx, arg in enumerate(args):
 if cmd_options.docker_run_path is not None:
     DOCKER_RUN_PATH = cmd_options.docker_run_path.rstrip('/')
 
-sys.path.append(os.path.join(DOCKER_RUN_PATH, 'docker', 'docker_drupal'))
+sys.path.append(os.path.join(DOCKER_RUN_PATH, 'docker', 'docker_console'))
 
 try:
-    from docker_drupal_overrides import *
+    from func_overrides import *
 except Exception as exception:
-    if "No module named docker_drupal_overrides" in str(exception):
+    if "No module named func_overrides" in str(exception):
         pass
     else:
-        print "Error during docker_drupal_overrides file import: ", exception
+        print "Error during func_overrides file import: ", exception

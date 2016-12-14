@@ -22,10 +22,10 @@ class Docker:
             env = ''
         self.compose_path = os.path.join(self.config.BUILD_PATH, 'docker-compose.yml')
         if not os.path.exists(self.compose_path) and self.config.steps_key not in ('default', 'init', 'help', 'refresh-autocomplete', 'cleanup', 'show-nginx-proxy-ip'):
-            message('docker-compose.yml file is missing. To run docker-drupal you need to do one of this things:\n'
+            message('docker-compose.yml file is missing. To run docker-console you need to do one of this things:\n'
                         'go to project wrapper path, \n'
                         'specify absolute path to project wrapper by -p (--docker-run-path) option\n'
-                        'create alias with your project wrapper path in ~/.docker_drupal/aliases (then docker-drupal @project_dev)', 'warning')
+                        'create alias with your project wrapper path in ~/.docker_console/aliases (then docker-console @project_dev)', 'warning')
             exit(0)
         self.compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '-template.yml')
         self.base_alias = self.get_project_name(self.config.BUILD_PATH)
@@ -324,7 +324,7 @@ class Docker:
         self.create_copy(temp_path, self.config.BUILD_PATH, cmd_options.docker_init_replace_conf)
         dir_util.remove_tree(temp_path)
         message("Docker has been correctly initialized in this project.", 'info')
-        message("If you want to automatically add config entry for this project to /etc/hosts, please run 'docker-drupal add-host-to-etc-hosts' command", 'info')
+        message("If you want to automatically add config entry for this project to /etc/hosts, please run 'docker-console add-host-to-etc-hosts' command", 'info')
 
     def add_entry_to_etc_hosts(self):
         try:
