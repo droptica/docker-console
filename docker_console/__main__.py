@@ -11,6 +11,7 @@ except:
 
 build_arrays = {
     'init': ['confirm_action', 'docker.docker_init'],
+    'init-tests': ['confirm_action', 'docker.docker_init_tests'],
     'add-host-to-etc-hosts': ['docker.add_entry_to_etc_hosts'],
     'refresh-autocomplete': ['docker.refresh_autocomplete'],
     'shell': ['docker.docker_shell'],
@@ -34,6 +35,7 @@ build_arrays = {
                         'drush.en("devel")', 'drush.run("cc all")', 'drush.run("uli")'],
 
     'drush': ['docker.drush_run'],
+    'codecept': ['docker.codecept_run'],
     'config-prepare': ['docker.config_prepare'],
     'add-host-to-docker-compose': ['docker.add_host'],
     'show-ip': ['docker.show_ip'],
@@ -43,6 +45,7 @@ build_arrays = {
     'test' : ['docker.tests_run'],
     'cleanup': ['docker.cleanup'],
     'dump': ['docker.docker_create_dump'],
+    'migrate-to-dcon': ['docker.migrate_to_dcon'],
 }
 
 try:

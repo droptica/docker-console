@@ -1,0 +1,29 @@
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/droptica/codeception-drupal-bootstrap"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/droptica/codeception-drupal-users"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/droptica/codeception-drupal-storage"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/droptica/codeception-drupal-content-types"
+    }
+  ],
+  "require": {
+    "codeception/codeception": "2.*",
+    "droptica/codeception-drupal-bootstrap": "dev-develop",
+    "droptica/codeception-drupal-users": "dev-master",
+    "droptica/codeception-drupal-storage": "dev-master",
+    "droptica/codeception-drupal-content-types": "dev-develop",
+    "ixis/codeception-drupal-mail": "dev-develop",
+    "phpunit/phpunit": "~5"
+  }
+}

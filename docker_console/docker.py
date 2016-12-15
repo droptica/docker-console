@@ -1,13 +1,10 @@
 import os
 import re
 import yaml
-import tempfile
-import uuid
 import time
-import shutil
 import tarfile
 from distutils import dir_util
-from .helpers import run as run_cmd, call as call_cmd, message
+from .helpers import run as run_cmd, call as call_cmd, message, create_files_copy
 from .autocomplete import setup_autocomplete
 from . import cmd_options
 
@@ -139,6 +136,19 @@ class Docker:
     def docker_drush(self, cmd=''):
         self.docker_run('drush -r %s %s' % (os.path.join('/app', self.config.DRUPAL_LOCATION), cmd))
 
+    def codecept_run(self):
+        cmd = ' '.join(self.config.args[2:])
+        self.docker_codecept(cmd)
+
+    def docker_codecept(self, cmd=''):
+        run_cmd('docker run -d --name selenium-test-%s %s %s %s'
+                % (self.base_alias, self._get_links(), self._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
+        print "Waitng 5 sec."
+        time.sleep(5)
+        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w %s %s codecept %s'
+            % (self._get_volumes(), self._get_links(), self._get_hosts(),
+               self.base_alias, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], cmd))
+
     def docker_create_dump(self):
         filename = 'database_dump_' + self.config.TIME_STR + '.sql'
         dump_path = os.path.join(self.config.BUILD_PATH, 'databases', filename)
@@ -215,16 +225,9 @@ class Docker:
             args = 'tests/' + ' '.join(self.config.args[2:])
         else:
             args = ''
-        run_cmd('docker run -d --name selenium-test-%s %s %s %s'
-                % (self.base_alias, self._get_links(), self._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
-        print "Waitng 5 sec."
-        time.sleep(5)
-        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w %s %s codecept clean'
-            % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               self.base_alias, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0]))
-        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w %s %s codecept run %s --html --xml'
-            % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               self.base_alias, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], args))
+        self.docker_codecept('build')
+        self.docker_codecept('clean')
+        self.docker_codecept('run %s --html --xml' % args)
         run_cmd('docker stop selenium-test-%s' % self.base_alias)
         run_cmd('docker rm selenium-test-%s' % self.base_alias)
         self.docker_command()
@@ -311,7 +314,7 @@ class Docker:
             print "can't set option %s, check order and values of passed args: %s" % (option_name, str(exception))
 
     def docker_init(self):
-        temp_path = self.create_copy(os.path.join(os.path.dirname(__file__), 'setup_defaults'))
+        temp_path = create_files_copy(os.path.join(os.path.dirname(__file__), 'setup_defaults'))
         compose_path = os.path.join(temp_path, 'docker-compose.yml')
         config_file = open(compose_path, 'r')
         content = config_file.read()
@@ -321,10 +324,19 @@ class Docker:
         config_file.write(content)
         config_file.close()
 
-        self.create_copy(temp_path, self.config.BUILD_PATH, cmd_options.docker_init_replace_conf)
+        create_files_copy(temp_path, self.config.BUILD_PATH, cmd_options.docker_init_replace_conf)
         dir_util.remove_tree(temp_path)
         message("Docker has been correctly initialized in this project.", 'info')
         message("If you want to automatically add config entry for this project to /etc/hosts, please run 'docker-console add-host-to-etc-hosts' command", 'info')
+
+    def docker_init_tests(self):
+        create_files_copy(os.path.join(os.path.dirname(__file__), 'tests_setup_defaults'), self.config.BUILD_PATH)
+
+        message("Tests has been correctly initialized in this project.", 'info')
+        message("If you wolud like to have source code of testing environment locally you need to run 'composer install' command in tests directory.", 'info')
+
+    def migrate_to_dcon(self):
+        create_files_copy(os.path.join(self.config.BUILD_PATH, 'docker', 'docker-drupal'), os.path.join(self.config.BUILD_PATH, 'docker_console'))
 
     def add_entry_to_etc_hosts(self):
         try:
@@ -350,31 +362,6 @@ class Docker:
                     message("Config entry with hosts: >>>%s<<< was not added to /etc/hosts file because it already contains entry with this hosts" % host_names, 'info')
         except:
             message('Config entry was not added to /etc/hosts.', 'warning')
-
-    def create_copy(self, path, dest_path=None, force_update=False):
-        if dest_path is None:
-            temp_dir = tempfile.gettempdir()
-            dest_path = os.path.join(temp_dir, str(uuid.uuid4()))
-            os.mkdir(dest_path)
-        for root, dirs, files in os.walk(path):
-            path_tail = root.split(path)[-1]
-            if not path_tail:
-                path_tail = "/"
-            for dir in dirs:
-                dest_dir_path = dest_path + os.path.join(path_tail, dir)
-                if not os.path.exists(dest_dir_path):
-                    os.mkdir(dest_dir_path)
-            for name in files:
-                dest_file_path = dest_path + os.path.join(path_tail, name)
-                src = os.path.join(root, name)
-
-                if not os.path.exists(dest_file_path) or force_update:
-                    shutil.copyfile(
-                        src,
-                        dest_file_path
-                    )
-
-        return dest_path
 
     def chown(self):
         self.docker_chown(self.config.DRUPAL_LOCATION, os.getuid())

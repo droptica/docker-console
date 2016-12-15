@@ -2,7 +2,9 @@ import sys, os
 import subprocess
 import functools
 import struct
-import math
+import tempfile
+import uuid
+import shutil
 
 def _get_terminal_size_linux():
     def ioctl_GWINSZ(fd):
@@ -141,3 +143,28 @@ def query_yes_no(question, default=None, yes_to_all=False):
             else:
                 sys.stdout.write("Please respond with 'yes' or 'no' "
                                  "(or 'y' or 'n').\n")
+
+def create_files_copy(path, dest_path=None, force_update=False):
+    if dest_path is None:
+        temp_dir = tempfile.gettempdir()
+        dest_path = os.path.join(temp_dir, str(uuid.uuid4()))
+        os.mkdir(dest_path)
+    for root, dirs, files in os.walk(path):
+        path_tail = root.split(path)[-1]
+        if not path_tail:
+            path_tail = "/"
+        for dir in dirs:
+            dest_dir_path = dest_path + os.path.join(path_tail, dir)
+            if not os.path.exists(dest_dir_path):
+                os.mkdir(dest_dir_path)
+        for name in files:
+            dest_file_path = dest_path + os.path.join(path_tail, name)
+            src = os.path.join(root, name)
+
+            if not os.path.exists(dest_file_path) or force_update:
+                shutil.copyfile(
+                    src,
+                    dest_file_path
+                )
+
+    return dest_path

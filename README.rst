@@ -81,12 +81,12 @@ without logging out.
 |
 
 - help:
-    Print available options, aliases AND commands including commands added locally for project in docker_console_overrides.py (if you are running this command in project wrapper).
+    Print available options, aliases AND commands including commands added locally for project in app_overrides.py (if you are running this command in project wrapper).
     If you use --help option, you will not see available commands, but you can always use::
 
         docker-console <tab><tab>
 
-    to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in docker_console_overrides.py.
+    to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in app_overrides.py.
 
     |
 
@@ -105,8 +105,8 @@ without logging out.
         - docker-compose.yml,
         - docker-compose-jenkins.yml,
         - docker/my.conf,
-        - docker/docker_console/overrides.py,
-        - docker/docker_console/config_overrides.py
+        - docker_console/app_overrides.py,
+        - docker_console/config_overrides.py
 
     Files existing in project wrapper localization, by default will not be replaced.
 
@@ -288,8 +288,8 @@ without logging out.
 To initialize docker-console in drupal project you can either manually create following files:
 
 - docker-compose.yml,
-- docker/docker_console/overrides.py,
-- docker/docker_console/config_overrides.py
+- docker_console/app_overrides.py,
+- docker_console/config_overrides.py
 
 |
 
@@ -304,12 +304,12 @@ command. This command will copy this files and some other additional files:
 
 |
 
-from default package templates to your project wrapper. If you are creating **docker/docker_console/config_overrides.py** file manually,
+from default package templates to your project wrapper. If you are creating **docker_console/config_overrides.py** file manually,
 you should **look at the source of docker_console package conf/default.py** file to see what config options are available and what are default values.
 
 After that, you should adjust settings for your project in::
 
-    <project_name>/docker/docker_console/config_overrides.py
+    <project_name>/docker_console/config_overrides.py
 
 file if needed.
 
@@ -382,7 +382,7 @@ to add autocomplete support for new aliases.
 
 To adjust configuration options you need to modify::
 
-    <project_name>/docker/docker_console/config_overrides.py
+    <project_name>/docker_console/config_overrides.py
 
 file.
 
@@ -409,13 +409,13 @@ Example config_overrides.py file::
 
 To adjust classes methods or commands you need to modify::
 
-    <project_name>/docker/docker_console/overrides.py
+    <project_name>/docker_console/app_overrides.py
 
 file.
 
 You can either replace existing classes methods or add new methods. Methods from classes can be used create new or replace existing commands locally in project context.
 
-Example overrides.py file::
+Example app_overrides.py file::
 
 
     #import classes to override
