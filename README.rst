@@ -1,4 +1,4 @@
-Application for running Drupal projects on Docker.
+Application that improves and speeds up web development process using Docker.
 
 |
 
@@ -8,14 +8,14 @@ Application for running Drupal projects on Docker.
 
 |
 
-**docker-drupal package installation**
-======================================
+**docker-console package installation**
+=======================================
 
-Requirements for docker-drupal:
+Requirements for docker-console:
 
-* Python 2.7
-* setuptools
-* pyyaml
+* python-pip package::
+
+    sudo apt-get update && sudo apt-get -y install python-pip
 
 |
 
@@ -23,16 +23,22 @@ Requirements for docker-drupal:
 * docker-compose
 
 
-When this requirements are satisfied, you can download docker-drupal package, unzip and go to unzipped directory with setup.py file. Then you can install package using command::
+When this requirements are satisfied, you can install docker-console through pip using command::
 
-    sudo python setup.py install
+    sudo pip install docker-console
+
+|
+
+All other dependencies will be automatically installed during docker-console installation process.
 
 |
 
 
-**docker-drupal package update**
-================================
-To update docker-drupal package, you need to do the same steps as for installation.
+**docker-console package update**
+=================================
+To update docker-console package, you need to run the same command as for installation with additional option **--upgrade**::
+
+    sudo pip install docker-console --upgrade
 
 |
 
@@ -41,11 +47,11 @@ To update docker-drupal package, you need to do the same steps as for installati
 
 During package installation, bash completion scripts are placed in::
 
-    /usr/share/bash-completion/completions/docker-drupal
+    /usr/share/bash-completion/completions/docker-console
 
 |
 
-To activate docker-drupal commands and options completion, you need to logout and login again, or type::
+To activate docker-console commands and options completion, you need to logout and login again, or type::
 
     exec bash
 
@@ -66,41 +72,41 @@ without logging out.
 - default:
     Default action if no command spefified. This command is equivalent to::
 
-        docker-drupal
+        docker-console
 
     and::
 
-        docker-drupal help
+        docker-console help
 
 |
 
 - help:
-    Print available options, aliases AND commands including commands added locally for project in docker_drupal_overrides.py (if you are running this command in project wrapper).
+    Print available options, aliases AND commands including commands added locally for project in docker_console_overrides.py (if you are running this command in project wrapper).
     If you use --help option, you will not see available commands, but you can always use::
 
-        docker-drupal <tab><tab>
+        docker-console <tab><tab>
 
-    to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in docker_drupal_overrides.py.
+    to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in docker_console_overrides.py.
 
     |
 
     This command is equivalent to::
 
-        docker-drupal
+        docker-console
 
     and::
 
-        docker-drupal default
+        docker-console default
 
 |
 
 - init:
-    This command is copying following files from docker-drupal default templates to project wrapper:
+    This command is copying following files from docker-console default templates to project wrapper:
         - docker-compose.yml,
         - docker-compose-jenkins.yml,
         - docker/my.conf,
-        - docker/docker_drupal/docker_drupal_overrides.py,
-        - docker/docker_drupal/docker_drupal_config_overrides.py
+        - docker/docker_console/overrides.py,
+        - docker/docker_console/config_overrides.py
 
     Files existing in project wrapper localization, by default will not be replaced.
 
@@ -171,7 +177,7 @@ without logging out.
 
     This command is equivalent to::
 
-        docker-drupal start
+        docker-console start
 
 |
 
@@ -182,7 +188,7 @@ without logging out.
 
     This command is equivalent to::
 
-        docker-drupal up
+        docker-console up
 
 |
 
@@ -194,8 +200,8 @@ without logging out.
 - restart:
     This command is equivalent to following two commands running one after another in order such as below::
 
-        1. docker-drupal stop
-        2. docker-drupal start/up
+        1. docker-console stop
+        2. docker-console start/up
 
 |
 
@@ -219,7 +225,7 @@ without logging out.
 - build:
     This command is running::
 
-        docker-drupal build-in-docker
+        docker-console build-in-docker
 
     command inside docker and some commands to set proper files permissions.
 
@@ -228,8 +234,8 @@ without logging out.
 - up-and-build:
     This command is equivalent to following two commands running one after another in order such as below::
 
-        1. docker-drupal up
-        2. docker-drupal build
+        1. docker-console up
+        2. docker-console build
 
 |
 
@@ -237,7 +243,7 @@ without logging out.
     This command is responsible for building Drupal application inside docker and it will be not working locally.
     It is used in::
 
-        docker-drupal build
+        docker-console build
 
     command as one of building step.
 
@@ -251,9 +257,9 @@ without logging out.
 |
 
 - \--help
-    See help for docker-drupal, you can also use::
+    See help for docker-console, you can also use::
 
-        docker-drupal help
+        docker-console help
 
     command
 
@@ -276,20 +282,20 @@ without logging out.
 
 |
 
-**docker-drupal initialization in drupal project**
-==================================================
+**docker-console initialization in drupal project**
+===================================================
 
-To initialize docker-drupal in drupal project you can either manually create following files:
+To initialize docker-console in drupal project you can either manually create following files:
 
 - docker-compose.yml,
-- docker/docker_drupal/docker_drupal_overrides.py,
-- docker/docker_drupal/docker_drupal_config_overrides.py
+- docker/docker_console/overrides.py,
+- docker/docker_console/config_overrides.py
 
 |
 
 , or run::
 
-    docker-drupal init
+    docker-console init
 
 command. This command will copy this files and some other additional files:
 
@@ -298,12 +304,12 @@ command. This command will copy this files and some other additional files:
 
 |
 
-from default package templates to your project wrapper. If you are creating **docker/docker_drupal/docker_drupal_config_overrides.py** file manually,
-you should **look at the source of docker_drupal package conf/default.py** file to see what config options are available and what are default values.
+from default package templates to your project wrapper. If you are creating **docker/docker_console/config_overrides.py** file manually,
+you should **look at the source of docker_console package conf/default.py** file to see what config options are available and what are default values.
 
 After that, you should adjust settings for your project in::
 
-    <project_name>/docker/docker_drupal/docker_drupal_config_overrides.py
+    <project_name>/docker/docker_console/config_overrides.py
 
 file if needed.
 
@@ -315,7 +321,7 @@ file if needed.
 
 To add config entry for project to /etc/hosts you need to run::
 
-    docker-drupal add-host-to-etc-hosts
+    docker-console add-host-to-etc-hosts
 
 This command will run docker for current project and add entry to /etc/hosts with IP Address taken from web container
 and hosts names taken from VIRTUAL_HOST variable for web and phpmyadmin containers configuration in docker-compose.yml
@@ -325,13 +331,13 @@ and hosts names taken from VIRTUAL_HOST variable for web and phpmyadmin containe
 **Adding Project Aliases**
 ==========================
 
-docker-drupal application allows for defining project aliases like in drush. In alias configuration there is only project wrapper path configuration. This path should be absolute.
+docker-console application allows for defining project aliases like in drush. In alias configuration there is only project wrapper path configuration. This path should be absolute.
 
 |
 
 Alias files have to be placed in::
 
-    ~/.docker_drupal/aliases/
+    ~/.docker_console/aliases/
 
 folder. This folder is automatically created during installation. You can place here as many aliases files as you need, with any number of aliases in each file.
 
@@ -351,15 +357,15 @@ Example alias.py file::
 
 |
 
-If you will create alias for project you will be able to run docker-drupal from anywhere with project path given in alias::
+If you will create alias for project you will be able to run docker-console from anywhere with project path given in alias::
 
-    docker-drupal @project_1_alias
+    docker-console @project_1_alias
 
 |
 
 After adding new aliases, you need to run::
 
-    docker-drupal refresh-autocomplete
+    docker-console refresh-autocomplete
 
 to add autocomplete support for new aliases.
 
@@ -376,7 +382,7 @@ to add autocomplete support for new aliases.
 
 To adjust configuration options you need to modify::
 
-    <project_name>/docker/docker_drupal/docker_drupal_config_overrides.py
+    <project_name>/docker/docker_console/config_overrides.py
 
 file.
 
@@ -386,7 +392,7 @@ You can either modify default options values or add new options.
 
 |
 
-Example docker_drupal_config_overrides.py file::
+Example config_overrides.py file::
 
     DB_NAME = "not_standard_db_name"
 
@@ -403,18 +409,18 @@ Example docker_drupal_config_overrides.py file::
 
 To adjust classes methods or commands you need to modify::
 
-    <project_name>/docker/docker_drupal/docker_drupal_overrides.py
+    <project_name>/docker/docker_console/overrides.py
 
 file.
 
 You can either replace existing classes methods or add new methods. Methods from classes can be used create new or replace existing commands locally in project context.
 
-Example docker_drupal_overrides.py file::
+Example overrides.py file::
 
 
     #import classes to override
-    from docker_drupal.drush import Drush
-    from docker_drupal.builder import Builder
+    from docker_console.drush import Drush
+    from docker_console.builder import Builder
 
     # add new methods
     class DrushLocal:
@@ -441,3 +447,4 @@ Example docker_drupal_overrides.py file::
         'localtest': ['confirm_action', 'drush.localtest("upwd %s --password=123" % self.config.DRUPAL_ADMIN_USER)'],
         'drush_uli': ['confirm_action("no")', 'drush.uli'],
     }
+

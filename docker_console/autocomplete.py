@@ -65,5 +65,6 @@ def setup_autocomplete():
               outf.write(content)
 
             os.system('sudo mv /tmp/bash_completion.tmp /usr/share/bash-completion/completions/docker-console')
+            os.system('sudo ln -sf /usr/share/bash-completion/completions/docker-console /usr/share/bash-completion/completions/dcon')
     except:
           pass

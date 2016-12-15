@@ -186,4 +186,4 @@ _docker_console() {
 eval "$__docker_console_previous_extglob_setting"
 unset __docker_console_previous_extglob_setting
 
-complete -F _docker_console docker-console
+complete -F _docker_console docker-console dcon
