@@ -14,6 +14,9 @@ os_commands = {
       'Ubuntu': {
             'package_install': 'apt-get -y install',
       },
+      'debian': {
+            'package_install': 'apt-get -y install',
+      },
 }
 
 class custom_install(install):
