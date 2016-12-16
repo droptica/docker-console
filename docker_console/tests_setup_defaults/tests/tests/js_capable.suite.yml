@@ -22,6 +22,7 @@ modules:
              curl:
                  CURLOPT_TIMEOUT: 1200
         - \Helper\Acceptance
+        - \Helper\DrupalHelper
         - \Codeception\Module\Drupal7\Drupal7:
             root: '/app/app'
             relative: no
