@@ -3,6 +3,7 @@ import sys
 from optparse import OptionParser, OptionGroup
 from .aliases import __all__ as available_aliases, aliases
 import docker_console.version
+import docker_console.helpers
 
 __version__ = docker_console.version.__version__
 
@@ -76,6 +77,11 @@ try:
     from app_overrides import *
 except Exception as exception:
     if "No module named app_overrides" in str(exception):
-        pass
+        if os.path.exists(os.path.join(DOCKER_RUN_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')):
+            if len(args) > 0 and args[0] != 'migrate-to-dcon':
+                docker_console.helpers.message("You probably forgot to migrate file wrapper/docker/docker_drupal/docker_drupal_overrides.py to wrapper/docker_console/app_overrides.py", 'error')
+                if os.path.exists(os.path.join(DOCKER_RUN_PATH, 'docker_console', 'config_overrides.py')):
+                    docker_console.helpers.message("You can move override files manually or use command 'dcon migrate-to-dcon' to move them automatically. Remember about replacing usages of docker_drupal with docker_console.", 'error')
+                    exit(0)
     else:
         print "Error during app_overrides file import: ", exception

@@ -343,23 +343,33 @@ class Docker:
         message("If you wolud like to have source code of testing environment locally you need to run 'composer install' command in tests directory.", 'info')
 
     def migrate_to_dcon(self):
-        overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')
-        overrides_dst = os.path.join(self.config.BUILD_PATH, 'docker_console', 'app_overrides.py')
-        overrides_file = open(overrides_src, 'r')
-        overrides_content = overrides_file.read()
-        overrides_file.close()
+        app_overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')
+        app_overrides_dst = os.path.join(self.config.BUILD_PATH, 'docker_console', 'app_overrides.py')
+        config_overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_config_overrides.py')
+        config_overrides_dst = os.path.join(self.config.BUILD_PATH, 'docker_console', 'config_overrides.py')
+        overrides_dst_dir = os.path.join(self.config.BUILD_PATH, 'docker_console')
+        if not os.path.exists(app_overrides_dst) and not os.path.exists(config_overrides_dst):
+            app_overrides_file = open(app_overrides_src, 'r')
+            app_overrides_content = app_overrides_file.read()
+            app_overrides_file.close()
 
-        overrides_content = overrides_content.replace('from docker_drupal.', 'from docker_console.')
+            app_overrides_content = app_overrides_content.replace('from docker_drupal.', 'from docker_console.')
 
-        os.mkdir(os.path.join(self.config.BUILD_PATH, 'docker_console'))
+            if not os.path.exists(overrides_dst_dir):
+                os.mkdir(overrides_dst_dir)
 
-        new_overrides_file = open(overrides_dst, 'w')
-        new_overrides_file.write(overrides_content)
-        new_overrides_file.close()
-        shutil.copy(
-                    os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_config_overrides.py'),
-                    os.path.join(self.config.BUILD_PATH, 'docker_console', 'config_overrides.py')
-                )
+            new_app_overrides_file = open(app_overrides_dst, 'w')
+            new_app_overrides_file.write(app_overrides_content)
+            new_app_overrides_file.close()
+            shutil.copy(
+                        config_overrides_src,
+                        config_overrides_dst
+                    )
+            message("Override files has been migrated successfully.", 'info')
+            message("Please compare wrapper/docker_console/config_overrides.py file with example_overrides/config_overrides.py from application source and update wrapper/docker_console/config_overrides.py if needed.", 'info')
+        else:
+            message("Migration aborted.", 'error')
+            message("Override files already exists in wrapper/docker_console. If you want to run migration once again, please remove all files from wrapper/docker_console before running 'migrate-to-dcon' command.", 'error')
 
     def add_entry_to_etc_hosts(self):
         try:
