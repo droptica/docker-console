@@ -37,6 +37,8 @@ __docker_console_pos_first_nonflag() {
 			case "${words[$counter]}" in
 				-*)
 					;;
+				@*)
+					;;
 				*)
 					break
 					;;

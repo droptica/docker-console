@@ -7,6 +7,7 @@ from distutils import dir_util
 from .helpers import run as run_cmd, call as call_cmd, message, create_files_copy
 from .autocomplete import setup_autocomplete
 from . import cmd_options
+import shutil
 
 
 class Docker:
@@ -138,16 +139,22 @@ class Docker:
 
     def codecept_run(self):
         cmd = ' '.join(self.config.args[2:])
-        self.docker_codecept(cmd)
+        link_selenium = False
+        if 'run' in cmd:
+            link_selenium = True
+        self.docker_codecept(cmd, link_selenium)
 
-    def docker_codecept(self, cmd=''):
-        run_cmd('docker run -d --name selenium-test-%s %s %s %s'
-                % (self.base_alias, self._get_links(), self._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
-        print "Waitng 5 sec."
-        time.sleep(5)
-        run_cmd('docker run --rm %s %s %s --link selenium-test-%s:selenium -w %s %s codecept %s'
+    def docker_codecept(self, cmd='', link_selenium=True):
+        link_selenium_name = ''
+        if link_selenium:
+            run_cmd('docker run -d --name selenium-test-%s %s %s %s'
+                    % (self.base_alias, self._get_links(), self._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
+            link_selenium_name = '--link selenium-test-%s:selenium' % self.base_alias
+            print "Waitng 5 sec."
+            time.sleep(5)
+        run_cmd('docker run --rm %s %s %s %s -w %s %s codecept %s'
             % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               self.base_alias, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], cmd))
+               link_selenium_name, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], cmd))
 
     def docker_create_dump(self):
         filename = 'database_dump_' + self.config.TIME_STR + '.sql'
@@ -225,8 +232,8 @@ class Docker:
             args = 'tests/' + ' '.join(self.config.args[2:])
         else:
             args = ''
-        self.docker_codecept('build')
-        self.docker_codecept('clean')
+        self.docker_codecept('build', False)
+        self.docker_codecept('clean', False)
         self.docker_codecept('run %s --html --xml' % args)
         run_cmd('docker stop selenium-test-%s' % self.base_alias)
         run_cmd('docker rm selenium-test-%s' % self.base_alias)
@@ -336,7 +343,23 @@ class Docker:
         message("If you wolud like to have source code of testing environment locally you need to run 'composer install' command in tests directory.", 'info')
 
     def migrate_to_dcon(self):
-        create_files_copy(os.path.join(self.config.BUILD_PATH, 'docker', 'docker-drupal'), os.path.join(self.config.BUILD_PATH, 'docker_console'))
+        overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')
+        overrides_dst = os.path.join(self.config.BUILD_PATH, 'docker_console', 'app_overrides.py')
+        overrides_file = open(overrides_src, 'r')
+        overrides_content = overrides_file.read()
+        overrides_file.close()
+
+        overrides_content = overrides_content.replace('from docker_drupal.', 'from docker_console.')
+
+        os.mkdir(os.path.join(self.config.BUILD_PATH, 'docker_console'))
+
+        new_overrides_file = open(overrides_dst, 'w')
+        new_overrides_file.write(overrides_content)
+        new_overrides_file.close()
+        shutil.copy(
+                    os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_config_overrides.py'),
+                    os.path.join(self.config.BUILD_PATH, 'docker_console', 'config_overrides.py')
+                )
 
     def add_entry_to_etc_hosts(self):
         try:
