@@ -41,7 +41,7 @@ uncomment only this settings which you want to override
 #
 # BUILD_PATH = DOCKER_RUN_PATH
 #
-# HOME_PATH = os.path.expanduser('~')
+# OS_USER_HOME_PATH = os.path.expanduser('~')
 #
 # DEV_DOCKER_IMAGES = {
 #     'default': ('droptica/drupal-dev', None),

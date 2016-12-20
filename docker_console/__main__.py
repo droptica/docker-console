@@ -1,17 +1,28 @@
 #!/usr/bin/env python
-from . import args
-from .builder import Builder
-from .conf import default
-from .helpers import message
+from importlib import import_module
+from docker_console import args
+from docker_console.utils.console import message
 
 try:
-    from . import build_arrays_overrides
+    from docker_console import build_arrays_overrides
 except:
     pass
 
+try:
+    settings = import_module('config_overrides')
+    WEB_ENGINE = settings.WEB['ENGINE']
+    web_engine = import_module('docker_console.web.engines.%s.builder' % WEB_ENGINE)
+    config = import_module('docker_console.web.engines.%s.conf.default' % WEB_ENGINE)
+except Exception as excepttion:
+    #TODO: load engines from home location
+    # load base web engine
+    web_engine = import_module('docker_console.web.engines.base.builder')
+    config = import_module('docker_console.web.engines.base.conf.default')
+
+#TODO: limit commands to used web engine
 build_arrays = {
     'init': ['confirm_action', 'docker.docker_init'],
-    'init-tests': ['confirm_action', 'docker.docker_init_tests'],
+    'init-tests': ['confirm_action', 'tests.tests_init'],
     'add-host-to-etc-hosts': ['docker.add_entry_to_etc_hosts'],
     'refresh-autocomplete': ['docker.refresh_autocomplete'],
     'shell': ['docker.docker_shell'],
@@ -35,14 +46,14 @@ build_arrays = {
                         'drush.en("devel")', 'drush.run("cc all")', 'drush.run("uli")'],
 
     'drush': ['docker.drush_run'],
-    'codecept': ['docker.codecept_run'],
+    'codecept': ['tests.codecept_run'],
     'config-prepare': ['docker.config_prepare'],
     'add-host-to-docker-compose': ['docker.add_host'],
     'show-ip': ['docker.show_ip'],
     'show-nginx-proxy-ip': ['docker.show_nginx_proxy_ip'],
     'default': ['print_help'],
     'help': ['print_help'],
-    'test' : ['docker.tests_run'],
+    'test' : ['tests.tests_run'],
     'cleanup': ['docker.cleanup'],
     'dump': ['docker.docker_create_dump'],
     'migrate-to-dcon': ['docker.migrate_to_dcon'],
@@ -67,10 +78,13 @@ def main():
     if len(args) > 0:
         steps_key = args[0]
     build_steps = build_array(steps_key)
-    default.steps_key = steps_key
-    default.build_arrays = build_arrays
+    config.steps_key = steps_key
+    config.build_arrays = build_arrays
 
-    builder = Builder(default)
+    if hasattr(web_engine, 'Builder'):
+        builder = web_engine.Builder(config)
+    else:
+        builder = web_engine.BaseBuilder(config)
     builder.build(build_steps)
 
 

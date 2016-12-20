@@ -3,14 +3,15 @@ import re
 import yaml
 import time
 import tarfile
-from distutils import dir_util
-from .helpers import run as run_cmd, call as call_cmd, message, create_files_copy
-from .autocomplete import setup_autocomplete
-from . import cmd_options
 import shutil
+from distutils import dir_util
+from docker_console import cmd_options
+from docker_console.bash_completion import setup_autocomplete
+from docker_console.utils.console import run as run_cmd, call as call_cmd, message
+from docker_console.utils.files import create_dir_copy
 
 
-class Docker:
+class BaseDocker(object):
 
     def __init__(self, config):
         self.config = config
@@ -94,25 +95,10 @@ class Docker:
 
     def _get_volumes(self):
         volumes = []
-        # if os.path.isfile(os.path.join(self.config.HOME_PATH, '.gitconfig')):
-        #     volumes.append('-v %s:%s:ro' % (os.path.join(self.config.HOME_PATH, '.gitconfig'), '/root/.gitconfig'))
-        # if os.path.isdir(os.path.join(self.config.HOME_PATH, '.ssh')):
-        #     volumes.append('-v %s:%s:ro' % (os.path.join(self.config.HOME_PATH, '.ssh'), '/root/.ssh'))
-        db_path = os.path.join(self.config.BUILD_PATH, self.config.DBDUMP_FILE)
+        db_path = os.path.join(self.config.BUILD_PATH, self.config.DB[self.config.db_alias]['DUMP_IMPORT_FILE'])
         if db_path and os.path.islink(db_path):
             real_db_path = os.path.realpath(db_path)
             volumes.append('-v %s:%s' % (real_db_path, db_path.replace(self.config.BUILD_PATH, '/app/')))
-
-        files_path = os.path.join(self.config.BUILD_PATH, self.config.FILES_ARCHIVE)
-        if files_path and os.path.islink(files_path):
-            real_files_path = os.path.realpath(files_path)
-            volumes.append('-v %s:%s' % (real_files_path, files_path.replace(self.config.BUILD_PATH, '/app/')))
-
-        private_files_path = os.path.join(self.config.BUILD_PATH, self.config.PRIVATE_FILES_ARCHIVE)
-        if private_files_path and os.path.islink(private_files_path):
-            real_private_files_path = os.path.realpath(private_files_path)
-            volumes.append('-v %s:%s' % (real_private_files_path,
-                                         private_files_path.replace(self.config.BUILD_PATH, '/app/')))
 
         volumes.append('-v %s:%s' % (self.config.BUILD_PATH, '/app'))
         return ' '.join(volumes)
@@ -125,42 +111,12 @@ class Docker:
     def docker_run(self, cmd):
         run_cmd(self.docker_command() + ' ' + cmd)
 
-    def drush_run(self):
-        if cmd_options.docker_drush_eval_run_code is None:
-            cmd = ' '.join(self.config.args[2:])
-        else:
-            cmd = "ev '%s'" % cmd_options.docker_drush_eval_run_code
-            if cmd_options.docker_yes_all:
-                cmd += ' -y'
-        self.docker_drush(cmd)
-
-    def docker_drush(self, cmd=''):
-        self.docker_run('drush -r %s %s' % (os.path.join('/app', self.config.DRUPAL_LOCATION), cmd))
-
-    def codecept_run(self):
-        cmd = ' '.join(self.config.args[2:])
-        link_selenium = False
-        if 'run' in cmd:
-            link_selenium = True
-        self.docker_codecept(cmd, link_selenium)
-
-    def docker_codecept(self, cmd='', link_selenium=True):
-        link_selenium_name = ''
-        if link_selenium:
-            run_cmd('docker run -d --name selenium-test-%s %s %s %s'
-                    % (self.base_alias, self._get_links(), self._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
-            link_selenium_name = '--link selenium-test-%s:selenium' % self.base_alias
-            print "Waitng 5 sec."
-            time.sleep(5)
-        run_cmd('docker run --rm %s %s %s %s -w %s %s codecept %s'
-            % (self._get_volumes(), self._get_links(), self._get_hosts(),
-               link_selenium_name, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], cmd))
-
     def docker_create_dump(self):
+        #TODO use db driver instead of drush
         filename = 'database_dump_' + self.config.TIME_STR + '.sql'
-        dump_path = os.path.join(self.config.BUILD_PATH, 'databases', filename)
+        dump_path = os.path.join(self.config.BUILD_PATH, self.config.DB[self.config.db_alias]['DUMP_EXPORT_LOCATION'], filename)
         self.docker_run('drush -r %s %s' %
-                        (os.path.join('/app', self.config.DRUPAL_LOCATION),
+                        (os.path.join('/app', self.config.WEB_APP_LOCATION),
                          'sql-dump >%s' % dump_path))
         tar = tarfile.open(dump_path + '.tar.gz', 'w:gz')
         tar.add(dump_path, filename)
@@ -224,21 +180,6 @@ class Docker:
             return 'docker run --rm -it %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
 
-    def tests_run(self):
-        if ('selenium_image' not in self.config.DEV_DOCKER_IMAGES) or ('codecept_image' not in self.config.DEV_DOCKER_IMAGES):
-            message('selenium_image or codecept_image is missing in DEV_DOCKER_IMAGES config.', 'error')
-            exit(0)
-        if len(self.config.args) > 2:
-            args = 'tests/' + ' '.join(self.config.args[2:])
-        else:
-            args = ''
-        self.docker_codecept('build', False)
-        self.docker_codecept('clean', False)
-        self.docker_codecept('run %s --html --xml' % args)
-        run_cmd('docker stop selenium-test-%s' % self.base_alias)
-        run_cmd('docker rm selenium-test-%s' % self.base_alias)
-        self.docker_command()
-        
     def get_container_ip(self):
         web_container_alias = self._container_alias("web:web").split(':')[0]
         if not run_cmd('docker ps -q -f name=%s' % web_container_alias, return_output=True):
@@ -321,7 +262,8 @@ class Docker:
             print "can't set option %s, check order and values of passed args: %s" % (option_name, str(exception))
 
     def docker_init(self):
-        temp_path = create_files_copy(os.path.join(os.path.dirname(__file__), 'setup_defaults'))
+        #TODO
+        temp_path = create_dir_copy(os.path.join(os.path.dirname(__file__), 'setup_defaults'))
         compose_path = os.path.join(temp_path, 'docker-compose.yml')
         config_file = open(compose_path, 'r')
         content = config_file.read()
@@ -331,16 +273,10 @@ class Docker:
         config_file.write(content)
         config_file.close()
 
-        create_files_copy(temp_path, self.config.BUILD_PATH, cmd_options.docker_init_replace_conf)
+        create_dir_copy(temp_path, self.config.BUILD_PATH, cmd_options.docker_init_replace_conf)
         dir_util.remove_tree(temp_path)
         message("Docker has been correctly initialized in this project.", 'info')
         message("If you want to automatically add config entry for this project to /etc/hosts, please run 'docker-console add-host-to-etc-hosts' command", 'info')
-
-    def docker_init_tests(self):
-        create_files_copy(os.path.join(os.path.dirname(__file__), 'tests_setup_defaults'), self.config.BUILD_PATH)
-
-        message("Tests has been correctly initialized in this project.", 'info')
-        message("If you wolud like to have source code of testing environment locally you need to run 'composer install' command in tests directory.", 'info')
 
     def migrate_to_dcon(self):
         app_overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')
@@ -397,7 +333,7 @@ class Docker:
             message('Config entry was not added to /etc/hosts.', 'warning')
 
     def chown(self):
-        self.docker_chown(self.config.DRUPAL_LOCATION, os.getuid())
+        self.docker_chown(self.config.WEB_APP_LOCATION, os.getuid())
 
     def add_host(self):
         container = self.config.args[2]
@@ -406,11 +342,11 @@ class Docker:
 
     def setfacl(self):
         if os.getuid():
-            self.docker_run('setfacl -Rm g:www-data:rwX %s' % self.config.DRUPAL_LOCATION)
-            self.docker_run('setfacl -d -Rm g:www-data:rwX  %s' % self.config.DRUPAL_LOCATION)
+            self.docker_run('setfacl -Rm g:www-data:rwX %s' % self.config.WEB_APP_LOCATION)
+            self.docker_run('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB_APP_LOCATION)
         else:
-            run_cmd('setfacl -Rm g:www-data:rwX %s' % self.config.DRUPAL_LOCATION)
-            run_cmd('setfacl -d -Rm g:www-data:rwX  %s' % self.config.DRUPAL_LOCATION)
+            run_cmd('setfacl -Rm g:www-data:rwX %s' % self.config.WEB_APP_LOCATION)
+            run_cmd('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB_APP_LOCATION)
 
     def cleanup(self):
         if run_cmd('docker ps -a -q -f status=exited', return_output=True):

@@ -1,24 +1,25 @@
 web:
-  image: droptica/drupal-apache
+  image: {{WEB_IMAGE}}
   volumes:
     - ./app:/var/www/html
   links:
-    - mysql:mysql
+    - db:db
   environment:
     VIRTUAL_HOST: {{HOST}},www.{{HOST}}
-mysql:
+
+db:
   image: mysql:5.6
   volumes:
-    - ./docker/my.conf:/etc/mysql/conf.d/custom.cnf:ro
+    - ./docker/database:/var/lib/mysql
   environment:
     MYSQL_ROOT_PASSWORD: 123
     MYSQL_DATABASE: db
     MYSQL_USER: user
     MYSQL_PASSWORD: pass
 
-phpmyadmin:
+db_web_admin:
   image: nazarpc/phpmyadmin
   links:
-    - mysql:mysql
+    - db:mysql
   environment:
       VIRTUAL_HOST: phpmyadmin.{{HOST}}

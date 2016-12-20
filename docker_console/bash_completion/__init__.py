@@ -1,5 +1,5 @@
 import os
-from .aliases import __all__ as available_aliases
+from ..utils.aliases import __all__ as available_aliases
 
 
 def get_available_commands():

@@ -4,18 +4,15 @@ import sys
 import re
 from copy import deepcopy
 from dotenv import load_dotenv
-
-from .drush import Drush
-from .docker import Docker
-from .database import Database
-from .drupal_settings import DrupalSettings
-from .archive import Archive
-from .helpers import run as run_cmd, rgetattr, query_yes_no
-from . import parser, cmd_options
 from optparse import OptionGroup
 
+from docker_console import parser, cmd_options
+from docker_console.db import load_driver
+from docker_console.utils.console import rgetattr, query_yes_no
+from docker_console.web.engines.base.tests import BaseTests
+from docker_console.web.engines.base.docker import BaseDocker
 
-class Builder:
+class BaseBuilder(object):
 
     def __init__(self, config):
         self.config = config
@@ -23,21 +20,21 @@ class Builder:
         if os.path.isfile(dotenv_path):
             load_dotenv(dotenv_path)
         self.config.ENV = os.environ.get("ENV")
-        if os.environ.get("SITE_URI"):
-            self.config.SITE_URI = os.environ.get("SITE_URI")
         self.config.NO_INTERACTIVE = os.environ.get("NO_INTERACTIVE")
         self.config.args = sys.argv
         self.now = datetime.datetime.now()
         self.config.TIME_STR = self.now.strftime("%Y-%m-%d.%H.%M")
-        self.drush = Drush(self.config)
-        self.drupal_settings = DrupalSettings(self.config)
-        self.database = Database(self.config, self.drush)
-        self.docker = Docker(self.config)
-        self.archive = Archive(self.config)
+        self.tests = BaseTests(self.config)
+        self.docker = BaseDocker(self.config)
 
+        #TODO: handle multiple db aliases by additional option
+        self.db_alias = 'default'
+        self.config.db_alias = self.db_alias
+        if self.db_alias in config.DB and 'DRIVER' in config.DB[self.db_alias] and config.DB[self.db_alias]['DRIVER']:
+            self.db_driver_name = config.DB[self.db_alias]['DRIVER']
+            self.db_driver = load_driver(self.db_driver_name)
+            self.database = self.db_driver.Database(self.config, self.db_alias)
 
-    def chmod_files(self):
-        run_cmd('chmod 777 -Rf %s' % os.path.join(self.config.DRUPAL_ROOT, self.config.FILES_DST, 'files'))
 
     def build(self, steps):
         for step in steps:
