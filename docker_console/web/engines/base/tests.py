@@ -21,18 +21,18 @@ class BaseTests(object):
         link_selenium_name = ''
         if link_selenium:
             run_cmd('docker run -d --name selenium-test-%s %s %s %s'
-                    % (self.docker.base_alias, self.docker._get_links(), self.docker._get_hosts(), self.config.DEV_DOCKER_IMAGES['selenium_image'][0]))
+                    % (self.docker.base_alias, self.docker._get_links(), self.docker._get_hosts(), self.config.TESTS['IMAGES']['selenium_image'][0]))
             link_selenium_name = '--link selenium-test-%s:selenium' % self.docker.base_alias
             print "Waitng 5 sec."
             time.sleep(5)
         run_cmd('docker run --rm %s %s %s %s -w %s %s codecept %s'
             % (self.docker._get_volumes(), self.docker._get_links(), self.docker._get_hosts(),
-               link_selenium_name, os.path.join('/app', self.config.TESTS_LOCATION), self.config.DEV_DOCKER_IMAGES['codecept_image'][0], cmd))
+               link_selenium_name, os.path.join('/app', self.config.TESTS['LOCATION']), self.config.TESTS['IMAGES']['codecept_image'][0], cmd))
 
     def tests_run(self):
-        if ('selenium_image' not in self.config.DEV_DOCKER_IMAGES) or (
-            'codecept_image' not in self.config.DEV_DOCKER_IMAGES):
-            message('selenium_image or codecept_image is missing in DEV_DOCKER_IMAGES config.', 'error')
+        if ('selenium_image' not in self.config.TESTS['IMAGES']) or (
+            'codecept_image' not in self.config.TESTS['IMAGES']):
+            message('selenium_image or codecept_image is missing in TESTS config.', 'error')
             exit(0)
         if len(self.config.args) > 2:
             args = 'tests/' + ' '.join(self.config.args[2:])

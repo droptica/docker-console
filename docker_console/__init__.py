@@ -5,7 +5,6 @@ from docker_console.utils.aliases import __all__ as available_aliases, aliases
 from docker_console.utils.console import message
 from docker_console.version import __version__
 
-#TODO: determine web engine and db driver
 parser = OptionParser(version=__version__)
 
 args = ["-p", "--docker-run-path",
@@ -58,6 +57,8 @@ parser.add_option_group(group)
 
 DOCKER_RUN_PATH = os.getcwd()
 
+OS_USER_HOME_PATH = os.path.expanduser('~')
+
 for idx, arg in enumerate(args):
     if arg.startswith('@'):
         try:
@@ -71,17 +72,15 @@ if cmd_options.docker_run_path is not None:
     DOCKER_RUN_PATH = cmd_options.docker_run_path.rstrip('/')
 
 sys.path.append(os.path.join(DOCKER_RUN_PATH, 'docker_console'))
+sys.path.append(os.path.join(OS_USER_HOME_PATH, '.docker_console'))
 
 try:
     from app_overrides import *
 except Exception as exception:
     if "No module named app_overrides" in str(exception):
-        #TODO: check this
         if os.path.exists(os.path.join(DOCKER_RUN_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')):
-            if len(args) > 0 and args[0] != 'migrate-to-dcon':
+            if len(args) > 0 and args[0] != 'init':
                 message("You probably forgot to migrate file wrapper/docker/docker_drupal/docker_drupal_overrides.py to wrapper/docker_console/app_overrides.py", 'error')
-                if os.path.exists(os.path.join(DOCKER_RUN_PATH, 'docker_console', 'config_overrides.py')):
-                    message("You can move override files manually or use command 'dcon migrate-to-dcon' to move them automatically. Remember about replacing usages of docker_drupal with docker_console.", 'error')
-                    exit(0)
+                message("Use command 'init' to create wrapper/docker_console/app_overrides.py file, and them adjust overrides manually.", 'error')
     else:
         print "Error during app_overrides file import: ", exception

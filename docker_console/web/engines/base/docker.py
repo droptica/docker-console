@@ -1,9 +1,6 @@
 import os
 import re
 import yaml
-import time
-import tarfile
-import shutil
 from distutils import dir_util
 from docker_console import cmd_options
 from docker_console.bash_completion import setup_autocomplete
@@ -20,7 +17,7 @@ class BaseDocker(object):
         else:
             env = ''
         self.compose_path = os.path.join(self.config.BUILD_PATH, 'docker-compose.yml')
-        if not os.path.exists(self.compose_path) and self.config.steps_key not in ('default', 'init', 'help', 'refresh-autocomplete', 'cleanup', 'show-nginx-proxy-ip'):
+        if not os.path.exists(self.compose_path) and self.config.steps_key not in self.config.global_commands:
             message('docker-compose.yml file is missing. To run docker-console you need to do one of this things:\n'
                         'go to project wrapper path, \n'
                         'specify absolute path to project wrapper by -p (--docker-run-path) option\n'
@@ -95,11 +92,6 @@ class BaseDocker(object):
 
     def _get_volumes(self):
         volumes = []
-        db_path = os.path.join(self.config.BUILD_PATH, self.config.DB[self.config.db_alias]['DUMP_IMPORT_FILE'])
-        if db_path and os.path.islink(db_path):
-            real_db_path = os.path.realpath(db_path)
-            volumes.append('-v %s:%s' % (real_db_path, db_path.replace(self.config.BUILD_PATH, '/app/')))
-
         volumes.append('-v %s:%s' % (self.config.BUILD_PATH, '/app'))
         return ' '.join(volumes)
 
@@ -110,18 +102,6 @@ class BaseDocker(object):
 
     def docker_run(self, cmd):
         run_cmd(self.docker_command() + ' ' + cmd)
-
-    def docker_create_dump(self):
-        #TODO use db driver instead of drush
-        filename = 'database_dump_' + self.config.TIME_STR + '.sql'
-        dump_path = os.path.join(self.config.BUILD_PATH, self.config.DB[self.config.db_alias]['DUMP_EXPORT_LOCATION'], filename)
-        self.docker_run('drush -r %s %s' %
-                        (os.path.join('/app', self.config.WEB_APP_LOCATION),
-                         'sql-dump >%s' % dump_path))
-        tar = tarfile.open(dump_path + '.tar.gz', 'w:gz')
-        tar.add(dump_path, filename)
-        tar.close()
-        os.remove(dump_path)
 
     def docker_up(self):
         run_cmd('docker-compose up -d', cwd=self.config.BUILD_PATH)
@@ -138,6 +118,12 @@ class BaseDocker(object):
                 ALL_DEV_DOCKER_IMAGES.append(self.config.DEV_DOCKER_IMAGES[image])
             elif isinstance(self.config.DEV_DOCKER_IMAGES[image], list):
                 ALL_DEV_DOCKER_IMAGES += self.config.DEV_DOCKER_IMAGES[image]
+
+        for image in self.config.TESTS['IMAGES']:
+            if isinstance(self.config.TESTS['IMAGES'][image], tuple):
+                ALL_DEV_DOCKER_IMAGES.append(self.config.TESTS['IMAGES'][image])
+            elif isinstance(self.config.TESTS['IMAGES'][image], list):
+                ALL_DEV_DOCKER_IMAGES += self.config.TESTS['IMAGES'][image]
 
         for DEV_DOCKER_IMAGE, DEV_DOCKER_IMAGE_DOCKERFILE in ALL_DEV_DOCKER_IMAGES:
             run_cmd('docker pull %s' % DEV_DOCKER_IMAGE)
@@ -278,35 +264,6 @@ class BaseDocker(object):
         message("Docker has been correctly initialized in this project.", 'info')
         message("If you want to automatically add config entry for this project to /etc/hosts, please run 'docker-console add-host-to-etc-hosts' command", 'info')
 
-    def migrate_to_dcon(self):
-        app_overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')
-        app_overrides_dst = os.path.join(self.config.BUILD_PATH, 'docker_console', 'app_overrides.py')
-        config_overrides_src = os.path.join(self.config.BUILD_PATH, 'docker', 'docker_drupal', 'docker_drupal_config_overrides.py')
-        config_overrides_dst = os.path.join(self.config.BUILD_PATH, 'docker_console', 'config_overrides.py')
-        overrides_dst_dir = os.path.join(self.config.BUILD_PATH, 'docker_console')
-        if not os.path.exists(app_overrides_dst) and not os.path.exists(config_overrides_dst):
-            app_overrides_file = open(app_overrides_src, 'r')
-            app_overrides_content = app_overrides_file.read()
-            app_overrides_file.close()
-
-            app_overrides_content = app_overrides_content.replace('from docker_drupal.', 'from docker_console.')
-
-            if not os.path.exists(overrides_dst_dir):
-                os.mkdir(overrides_dst_dir)
-
-            new_app_overrides_file = open(app_overrides_dst, 'w')
-            new_app_overrides_file.write(app_overrides_content)
-            new_app_overrides_file.close()
-            shutil.copy(
-                        config_overrides_src,
-                        config_overrides_dst
-                    )
-            message("Override files has been migrated successfully.", 'info')
-            message("Please compare wrapper/docker_console/config_overrides.py file with example_overrides/config_overrides.py from application source and update wrapper/docker_console/config_overrides.py if needed.", 'info')
-        else:
-            message("Migration aborted.", 'error')
-            message("Override files already exists in wrapper/docker_console. If you want to run migration once again, please remove all files from wrapper/docker_console before running 'migrate-to-dcon' command.", 'error')
-
     def add_entry_to_etc_hosts(self):
         try:
             nginx_proxy_ip = self.get_nginx_proxy_ip()
@@ -333,7 +290,7 @@ class BaseDocker(object):
             message('Config entry was not added to /etc/hosts.', 'warning')
 
     def chown(self):
-        self.docker_chown(self.config.WEB_APP_LOCATION, os.getuid())
+        self.docker_chown(self.config.WEB['APP_LOCATION'], os.getuid())
 
     def add_host(self):
         container = self.config.args[2]
@@ -342,11 +299,11 @@ class BaseDocker(object):
 
     def setfacl(self):
         if os.getuid():
-            self.docker_run('setfacl -Rm g:www-data:rwX %s' % self.config.WEB_APP_LOCATION)
-            self.docker_run('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB_APP_LOCATION)
+            self.docker_run('setfacl -Rm g:www-data:rwX %s' % self.config.WEB['APP_LOCATION'])
+            self.docker_run('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB['APP_LOCATION'])
         else:
-            run_cmd('setfacl -Rm g:www-data:rwX %s' % self.config.WEB_APP_LOCATION)
-            run_cmd('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB_APP_LOCATION)
+            run_cmd('setfacl -Rm g:www-data:rwX %s' % self.config.WEB['APP_LOCATION'])
+            run_cmd('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB['APP_LOCATION'])
 
     def cleanup(self):
         if run_cmd('docker ps -a -q -f status=exited', return_output=True):

@@ -19,10 +19,10 @@ class DrupalSettings:
 
     def copy_settings(self):
         msg('Copy settings')
-        dst = os.path.join(self.config.WEB_APP_ROOT, 'sites/', self.config.DRUPAL['SITE_DIRECTORY'])
+        dst = os.path.join(self.config.WEB['APP_ROOT'], 'sites/', self.config.DRUPAL[self.config.drupal_site]['SITE_DIRECTORY'])
 
-        if hasattr(self.config, 'SETTINGS_DIR') and self.config.DRUPAL['SETTINGS_DIR'] is not None:
-            settings_dir_path = os.path.join(self.config.BUILD_PATH, 'conf', self.config.DRUPAL['SETTINGS_DIR'])
+        if hasattr(self.config, 'SETTINGS_DIR') and self.config.DRUPAL[self.config.drupal_site]['SETTINGS_DIR'] is not None:
+            settings_dir_path = os.path.join(self.config.BUILD_PATH, 'conf', self.config.DRUPAL[self.config.drupal_site]['SETTINGS_DIR'])
         else:
             settings_dir_path = os.path.join(self.config.BUILD_PATH, 'conf')
 

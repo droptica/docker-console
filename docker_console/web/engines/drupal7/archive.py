@@ -7,11 +7,11 @@ class Archive:
         self.config = config
 
     def unpack_files(self):
-        src = os.path.join(self.config.BUILD_PATH, self.config.FILES_ARCHIVE)
-        dest = os.path.join(self.config.WEB_APP_ROOT, self.config.FILES_DST)
+        src = os.path.join(self.config.BUILD_PATH, self.config.DRUPAL[self.config.drupal_site]['FILES_ARCHIVE'])
+        dest = os.path.join(self.config.WEB['APP_ROOT'], self.config.DRUPAL[self.config.drupal_site]['FILES_DST'])
         unpack_tar(src, dest)
 
     def unpack_private_files(self):
-        src = os.path.join(self.config.BUILD_PATH, self.config.PRIVATE_FILES_ARCHIVE)
-        dest = os.path.join(self.config.WEB_APP_ROOT, self.config.PRIVATE_FILES_DST)
+        src = os.path.join(self.config.BUILD_PATH, self.config.DRUPAL[self.config.drupal_site]['PRIVATE_FILES_ARCHIVE'])
+        dest = os.path.join(self.config.WEB['APP_ROOT'], self.config.DRUPAL[self.config.drupal_site]['PRIVATE_FILES_DST'])
         unpack_tar(src, dest)

@@ -14,6 +14,10 @@ class Builder(BaseBuilder):
 
         if os.environ.get("SITE_URI"):
             self.config.DRUPAL['SITE_URI'] = os.environ.get("SITE_URI")
+
+        #TODO: handle drupal sites by additional option
+        self.drupal_site = 'default'
+        self.config.drupal_site = self.drupal_site
         self.docker = Docker(self.config)
         self.tests = Tests(self.config)
         self.drush = Drush(self.config)
@@ -21,4 +25,4 @@ class Builder(BaseBuilder):
         self.archive = Archive(self.config)
 
     def chmod_files(self):
-        run_cmd('chmod 777 -Rf %s' % os.path.join(self.config.WEB_APP_ROOT, self.config.DRUPAL['FILES_DST'], 'files'))
+        run_cmd('chmod 777 -Rf %s' % os.path.join(self.config.WEB['APP_ROOT'], self.config.DRUPAL[self.config.drupal_site]['FILES_DST'], 'files'))

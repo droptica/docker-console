@@ -140,3 +140,5 @@ def query_yes_no(question, default=None, yes_to_all=False):
             else:
                 sys.stdout.write("Please respond with 'yes' or 'no' "
                                  "(or 'y' or 'n').\n")
+
+#TODO: fix size of output

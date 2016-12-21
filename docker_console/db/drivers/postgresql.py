@@ -25,4 +25,6 @@ class Database(BaseDatabase):
         msg('Import sql file')
         #TODO:
 
-
+    def export_db(self):
+        msg('Export DB')
+        #TODO:

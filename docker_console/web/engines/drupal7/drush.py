@@ -5,8 +5,8 @@ class Drush:
 
     def __init__(self, config):
         self.config = config
-        self.path = self.config.WEB_APP_ROOT
-        self.uri = self.config.DRUPAL['SITE_URI']
+        self.path = self.config.WEB['APP_ROOT']
+        self.uri = self.config.DRUPAL[self.config.drupal_site]['SITE_URI']
         
     def run(self, command):
         return run_cmd("drush -r %s --uri=%s %s " % (self.path, self.uri, command))
@@ -40,11 +40,11 @@ class Drush:
         return self.run('config-import -y')
 
     def change_password(self):
-        return self.run('upwd %s --password=%s' % (self.config.DRUPAL['DRUPAL_ADMIN_USER'], self.config.DRUPAL['DRUPAL_ADMIN_PASS']))
+        return self.run('upwd %s --password=%s' % (self.config.DRUPAL[self.config.drupal_site]['DRUPAL_ADMIN_USER'], self.config.DRUPAL[self.config.drupal_site]['DRUPAL_ADMIN_PASS']))
 
     def file_proxy(self):
         self.en('stage_file_proxy')
-        return self.run('variable-set stage_file_proxy_origin "%s"' % self.config.DRUPAL['STAGE_FILE_PROXY_URL'])
+        return self.run('variable-set stage_file_proxy_origin "%s"' % self.config.DRUPAL[self.config.drupal_site]['STAGE_FILE_PROXY_URL'])
 
     def drush_import(self, file_path):
         self.run('sql-cli <%s' % file_path)
