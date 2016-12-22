@@ -57,11 +57,11 @@ if not engine_loaded:
         config = import_module('docker_console.web.engines.base.conf.default')
         config.global_commands = global_commands
 
-#TODO: limit commands to used web engine
 
 commands = web_engine_commands.commands
 
 try:
+    #try to override commands
     commands.update(commands_overrides)
 except:
     pass

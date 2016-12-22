@@ -23,7 +23,6 @@ os_commands = {
 class custom_install(install):
     def copy_docker_drupal_files(self, home_docker_console_dir):
         home_docker_drupal_dir = os.path.join(os.path.expanduser('~'), '.docker_drupal', 'aliases')
-        print home_docker_console_dir
         if os.path.exists(home_docker_drupal_dir):
             create_dir_copy(home_docker_drupal_dir, home_docker_console_dir)
 
@@ -35,6 +34,15 @@ class custom_install(install):
         if not os.path.exists(home_docker_console_dir):
             os.makedirs(home_docker_console_dir)
             os.chmod(home_docker_console_dir, 0777)
+
+        aliases_file_path = os.path.join(home_docker_console_dir, 'aliases.py')
+        init_file_path = os.path.join(home_docker_console_dir, '__init__.py')
+        if not os.path.exists(aliases_file_path):
+            aliases = open(aliases_file_path, 'w')
+            aliases.close()
+        if not os.path.exists(init_file_path):
+            aliases = open(init_file_path, 'w')
+            aliases.close()
 
     def run(self):
         self.pre_install()

@@ -1,6 +1,7 @@
 from docker_console.web.engines.base.conf.default import *
 
 DRUPAL = {
+    #TODO:
     'default': {
         'FILES_DST': 'sites/default/',
         'FILES_ARCHIVE': 'files/files.tar.gz',
