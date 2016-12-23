@@ -7,12 +7,17 @@ from docker_console.version import __version__
 
 parser = OptionParser(version=__version__)
 
+global_commands = ['default', 'init', 'init-tests', 'help', 'refresh-autocomplete', 'cleanup', 'show-nginx-proxy-ip']
+
 args = ["-p", "--docker-run-path",
         "-s", "--docker-shell-run",
         "-c", "--docker-container",
         "-f", "--force-replace-conf",
         "-e", "--drush-eval-run-code",
         "--version",
+        "--tpl",
+        "--db",
+        "--site",
         "-y"]
 
 for i, arg in enumerate(sys.argv):
@@ -35,20 +40,31 @@ parser.add_option("-c", "--docker-container", dest="docker_container",
 
 parser.add_option("-f", "--force-replace-conf", action="store_true", dest="docker_init_replace_conf",
               help="Use with action 'init'. "
-                   "Set if you want force replace your existing config files "
-                   "docker-compose.yml, docker-compose-jenkins.yml, docker/my.conf, docker_console/app_overrides.py and docker_console/config_overrides.py."
-                   "All your changes in listed files will be irrevocably lost. Other files in wrapper folder and 'docker' folder will stay unchanged.",)
-
-parser.add_option("-e", "--drush-eval-run-code", dest="docker_drush_eval_run_code",
-              help="Use with action 'drush'. "
-                   "Set if you want run code in drush eval", metavar="DRUSH_EVAL_RUN_CODE")
+                   "Set if you want force replace your existing config files ",)
 
 parser.add_option("-y", action="store_true", dest="docker_yes_all",
               help="yes to all questions where 'confirm_action' is used in action steps",)
 
+parser.add_option("--tpl", dest="init_template",
+              help="select web engine to init in project", metavar="INIT_TEMPLATE")
+
+parser.add_option("--db", dest="app_database",
+              help="select DB to work with", metavar="APP_DATABASE")
+
+#TODO: this options should be in drupal7 engine but engine is loaded later in __main__
+parser.add_option("-e", "--drush-eval-run-code", dest="docker_drush_eval_run_code",
+              help="Use with action 'drush'. "
+                   "Set if you want run code in drush eval", metavar="DRUSH_EVAL_RUN_CODE")
+
+parser.add_option("--site", dest="drupal_site",
+              help="select Drupal site to work with", metavar="DRUPAL_SITE")
+
+
 parser.set_defaults(docker_shell_run=False)
 parser.set_defaults(docker_init_replace_conf=False)
 parser.set_defaults(docker_yes_all=False)
+parser.set_defaults(app_database='default')
+parser.set_defaults(drupal_site='default')
 
 group = OptionGroup(parser, "Available aliases", ", ".join('@%s' % alias for alias in available_aliases[:]))
 parser.add_option_group(group)
@@ -75,12 +91,12 @@ sys.path.append(os.path.join(DOCKER_RUN_PATH, 'docker_console'))
 sys.path.append(os.path.join(OS_USER_HOME_PATH, '.docker_console'))
 
 try:
-    from app_overrides import *
+    from dc_overrides import *
 except Exception as exception:
-    if "No module named app_overrides" in str(exception):
+    if "No module named dc_overrides" in str(exception):
         if os.path.exists(os.path.join(DOCKER_RUN_PATH, 'docker', 'docker_drupal', 'docker_drupal_overrides.py')):
-            if len(args) > 0 and args[0] != 'init':
-                message("You probably forgot to migrate file wrapper/docker/docker_drupal/docker_drupal_overrides.py to wrapper/docker_console/app_overrides.py", 'error')
-                message("Use command 'init' to create wrapper/docker_console/app_overrides.py file, and them adjust overrides manually.", 'error')
+            if len(args) > 0 and args[0] not in global_commands:
+                message("You probably forgot to migrate file %s/docker/docker_drupal/docker_drupal_overrides.py to %s/docker_console/dc_overrides.py" % (DOCKER_RUN_PATH, DOCKER_RUN_PATH), 'error')
+                message("Use command 'init' to create %s/docker_console/dc_overrides.py file, and then adjust overrides manually." % DOCKER_RUN_PATH, 'error')
     else:
-        print "Error during app_overrides file import: ", exception
+        print "Error during dc_overrides file import: ", exception

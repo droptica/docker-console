@@ -27,8 +27,7 @@ class BaseBuilder(object):
         self.tests = BaseTests(self.config)
         self.docker = BaseDocker(self.config)
 
-        #TODO: handle db aliases by additional option
-        self.db_alias = 'default'
+        self.db_alias = cmd_options.app_database
         self.config.db_alias = self.db_alias
         if self.db_alias in config.DB and 'DRIVER' in config.DB[self.db_alias] and config.DB[self.db_alias]['DRIVER']:
             self.db_driver_name = config.DB[self.db_alias]['DRIVER']

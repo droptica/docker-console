@@ -45,7 +45,7 @@ class BaseTests(object):
         run_cmd('docker rm selenium-test-%s' % self.docker.base_alias)
 
     def tests_init(self):
-        create_dir_copy(os.path.join(os.path.dirname(__file__), 'tests_setup_defaults'), self.config.BUILD_PATH)
+        self.docker._copy_init_tpl_files('tests_init')
 
         message("Tests has been correctly initialized in this project.", 'info')
         message("If you wolud like to have source code of testing environment locally you need to run 'composer install' command in tests directory.", 'info')

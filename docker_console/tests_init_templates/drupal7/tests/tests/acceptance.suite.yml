@@ -4,21 +4,20 @@
 # Perform tests in browser using the WebDriver or PhpBrowser.
 # If you need both WebDriver and PHPBrowser tests - create a separate suite.
 
-class_name: JSCapableTester
+class_name: AcceptanceTester
 modules:
     enabled:
         - Db:
-             dsn: 'mysql:host=DB_HOST;dbname=DB_NAME'
-             user: 'DB_USER'
-             password: 'DB_PASS'
+             dsn: 'mysql:host=mysql;dbname=db'
+             user: 'user'
+             password: 'pass'
              dump: 'tests/_data/dump.sql'
              populate: false
              cleanup: false
              reconnect: true
-        - WebDriver:
-             host: selenium
+        - PhpBrowser:
              url: http://web
-             browser: chrome
+             auth: ['login', 'pass']
              curl:
                  CURLOPT_TIMEOUT: 1200
         - \Helper\Acceptance

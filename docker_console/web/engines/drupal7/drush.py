@@ -40,7 +40,7 @@ class Drush:
         return self.run('config-import -y')
 
     def change_password(self):
-        return self.run('upwd %s --password=%s' % (self.config.DRUPAL[self.config.drupal_site]['DRUPAL_ADMIN_USER'], self.config.DRUPAL[self.config.drupal_site]['DRUPAL_ADMIN_PASS']))
+        return self.run('upwd %s --password=%s' % (self.config.DRUPAL[self.config.drupal_site]['ADMIN_USER'], self.config.DRUPAL[self.config.drupal_site]['ADMIN_PASS']))
 
     def file_proxy(self):
         self.en('stage_file_proxy')

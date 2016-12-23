@@ -12,5 +12,5 @@ class BaseDatabase(object):
 
     def unpack_db(self):
         src = os.path.join(self.config.BUILD_PATH, self.DUMP_IMPORT_FILE)
-        tar = unpack_tar(src, self.config.TMP_PATH)
-        return [os.path.join(self.config.TMP_PATH, member.name) for member in sql_files(tar)]
+        tar = unpack_tar(src, self.config.WEB['TMP_PATH'])
+        return [os.path.join(self.config.WEB['TMP_PATH'], member.name) for member in sql_files(tar)]

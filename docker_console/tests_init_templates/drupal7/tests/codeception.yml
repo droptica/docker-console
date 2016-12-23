@@ -16,9 +16,9 @@ extensions:
 modules:
     config:
         Db:
-            dsn: 'mysql:host=DB_HOST;dbname=DB_NAME'
-            user: 'DB_USER'
-            password: 'DB_PASS'
+            dsn: 'mysql:host=mysql;dbname=db'
+            user: 'user'
+            password: 'pass'
             dump: 'tests/_data/dump.sql'
             populate: false
             cleanup: false

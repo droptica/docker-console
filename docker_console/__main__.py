@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from importlib import import_module
-from docker_console import args, DOCKER_RUN_PATH
+from docker_console import args, DOCKER_RUN_PATH, global_commands
 from docker_console.utils.console import message
 
 try:
@@ -9,33 +9,32 @@ try:
 except:
     pass
 
-global_commands = ['default', 'init', 'help', 'refresh-autocomplete', 'cleanup', 'show-nginx-proxy-ip']
 config = None
 
 try:
-    config = import_module('app_settings')
+    config = import_module('dc_settings')
     config.global_commands = global_commands
     config.WEB['APP_ROOT'] = os.path.realpath(os.path.join(config.BUILD_PATH, config.WEB['APP_LOCATION']))
 except Exception as exception:
-    if "No module named app_settings" in str(exception):
+    if "No module named dc_settings" in str(exception):
         if os.path.exists(os.path.join(DOCKER_RUN_PATH, 'docker', 'docker_drupal', 'docker_drupal_config_overrides.py')):
             if len(args) > 0 and args[0] not in global_commands:
-                message("You probably forgot to migrate file wrapper/docker/docker_drupal/docker_drupal_config_overrides.py to wrapper/docker_console/app_settings.py", 'error')
-                message("wrapper/docker_console/app_settings.py file is required and must contain WEB, DB and engine specific settings.", 'error')
-                message("Settings in docker_drupal_config_overrides.py and app_settings.py are not compatibile, the best solution is to use command 'init' and then adjust default config manually.", 'error')
+                message("You probably forgot to migrate file %s/docker/docker_drupal/docker_drupal_config_overrides.py to %s/docker_console/dc_settings.py" % (DOCKER_RUN_PATH, DOCKER_RUN_PATH), 'error')
+                message("%s/docker_console/dc_settings.py file is required and must contain WEB, DB, DEV_DOCKER_IMAGES and engine specific settings." % DOCKER_RUN_PATH, 'error')
+                message("Settings in docker_drupal_config_overrides.py and dc_settings.py are not compatibile, the best solution is to use command 'init' and then adjust default config manually.", 'error')
                 exit(0)
         elif len(args) > 0 and args[0] not in global_commands:
-            message("Missing wrapper/docker_console/app_settings.py file. This file is required and must contain WEB, DB and engine specific settings. Use command 'init' and then adjust default config manually.", 'error')
+            message("Missing %s/docker_console/dc_settings.py file. This file is required and must contain WEB, DB, DEV_DOCKER_IMAGES and engine specific settings. Use command 'init' and then adjust default config manually." % DOCKER_RUN_PATH, 'error')
             exit(0)
     else:
-        print "Error during app_settings file import: ", exception
+        print "Error during dc_settings file import: ", exception
         exit(0)
 
 engine_loaded = False
 
 if config and hasattr(config, 'WEB') and 'USE_CUSTOM_ENGINE' in config.WEB and config.WEB['USE_CUSTOM_ENGINE']:
     try:
-        # try to load custom web engine from user home dirconfig = app_settings
+        # try to load custom web engine from user home dir
         web_engine_builder = import_module('custom_web_engines.%s.builder' % config.WEB['ENGINE'])
         web_engine_commands = import_module('custom_web_engines.%s.commands' % config.WEB['ENGINE'])
         engine_loaded = True

@@ -16,9 +16,8 @@ drupal_commands = {
         'docker.setfacl',
         'chmod_files'
     ],
-
     'build-in-docker': [
-        'drupal_settings.copy_settings',
+        'drupal_settings.copy_settings("drupal7")',
         'database.drop_db',
         'database.create_db',
         'database.import_db',

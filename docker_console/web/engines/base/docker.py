@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import yaml
 from distutils import dir_util
@@ -247,20 +248,83 @@ class BaseDocker(object):
         except Exception as exception:
             print "can't set option %s, check order and values of passed args: %s" % (option_name, str(exception))
 
-    def docker_init(self):
-        #TODO
-        temp_path = create_dir_copy(os.path.join(os.path.dirname(__file__), 'setup_defaults'))
-        compose_path = os.path.join(temp_path, 'docker-compose.yml')
-        config_file = open(compose_path, 'r')
+    def _init_tpl_render(self, src):
+        config_file = open(src, 'r')
         content = config_file.read()
         config_file.close()
-        content = content.replace("{{HOST}}", self.base_alias + '.dev')
-        config_file = open(compose_path, 'w')
+        context = {
+            '{{HOST}}': self.base_alias + '.dev'
+        }
+        for key in context:
+            value = context[key]
+            content = content.replace(key, value)
+        dst = src[:-len('-tpl')]
+        config_file = open(dst, 'w')
         config_file.write(content)
         config_file.close()
+        os.remove(src)
+
+    def _copy_init_tpl_files(self, type):
+        init_tpl = {
+            'docker_init': {
+                'default_init_tpl_dir': 'docker_init_templates',
+                'custom_init_tpl_dir': 'custom_docker_init_templates',
+                'info_msg': 'You have to specify docker init template using option --tpl',
+                'available_msg': 'Available %s docker init templates: %s',
+                'missing_msg': "Docker init template '%s' does not exists."
+            },
+            'tests_init': {
+                'default_init_tpl_dir': 'tests_init_templates',
+                'custom_init_tpl_dir': 'custom_tests_init_templates',
+                'info_msg': 'You have to specify tests init template using option --tpl',
+                'available_msg': 'Available %s tests init templates: %s',
+                'missing_msg': "Tests init template '%s' does not exists."
+            }
+        }
+        default_init_tpl_path = os.path.join(os.path.dirname(sys.modules['docker_console'].__file__), init_tpl[type]['default_init_tpl_dir'])
+        custom_init_tpl_path = os.path.join(os.path.expanduser('~'), '.docker_console', init_tpl[type]['custom_init_tpl_dir'])
+        all_default_templates = []
+        all_custom_templates = []
+        for item in os.listdir(default_init_tpl_path):
+            if os.path.isdir(os.path.join(default_init_tpl_path, item)):
+                all_default_templates.append(item)
+        if os.path.exists(custom_init_tpl_path):
+            for item in os.listdir(custom_init_tpl_path):
+                if os.path.isdir(os.path.join(custom_init_tpl_path, item)):
+                    all_custom_templates.append(item)
+
+        if not cmd_options.init_template:
+            message(init_tpl[type]['info_msg'], 'error')
+            message(init_tpl[type]['available_msg'] % ('default', ', '.join(all_default_templates)), 'error')
+            if len(all_custom_templates):
+                message(init_tpl[type]['available_msg'] % ('custom', ', '.join(all_custom_templates)), 'error')
+            exit(0)
+        if cmd_options.init_template and cmd_options.init_template not in all_default_templates and cmd_options.init_template not in all_custom_templates:
+            message(init_tpl[type]['missing_msg'] % cmd_options.init_template, 'error')
+            message(init_tpl[type]['available_msg'] % ('default', ', '.join(all_default_templates)), 'error')
+            if len(all_custom_templates):
+                message(init_tpl[type]['available_msg'] % ('custom', ', '.join(all_custom_templates)), 'error')
+            exit(0)
+
+        if cmd_options.init_template in all_custom_templates:
+            temp_path = create_dir_copy(os.path.join(custom_init_tpl_path, cmd_options.init_template))
+        else:
+            temp_path = create_dir_copy(os.path.join(default_init_tpl_path, cmd_options.init_template))
+
+        for root, dirs, files in os.walk(temp_path):
+            for name in files:
+                if name.endswith('-tpl'):
+                    src = os.path.join(root, name)
+                    self._init_tpl_render(src)
 
         create_dir_copy(temp_path, self.config.BUILD_PATH, cmd_options.docker_init_replace_conf)
         dir_util.remove_tree(temp_path)
+
+    def docker_init(self):
+        self._copy_init_tpl_files('docker_init')
+        app_path = os.path.join(self.config.BUILD_PATH, 'app')
+        if not os.path.exists(app_path):
+            os.mkdir(app_path)
         message("Docker has been correctly initialized in this project.", 'info')
         message("If you want to automatically add config entry for this project to /etc/hosts, please run 'docker-console add-host-to-etc-hosts' command", 'info')
 

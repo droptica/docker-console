@@ -81,12 +81,12 @@ without logging out.
 |
 
 - help:
-    Print available options, aliases AND commands including commands added locally for project in app_overrides.py (if you are running this command in project wrapper).
+    Print available options, aliases AND commands including commands added locally for project in dc_overrides.py (if you are running this command in project wrapper).
     If you use --help option, you will not see available commands, but you can always use::
 
         docker-console <tab><tab>
 
-    to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in app_overrides.py.
+    to see this available commands. Note that autocomplete mechanism is not working for commands added locally for project in dc_overrides.py.
 
     |
 
@@ -105,8 +105,8 @@ without logging out.
         - docker-compose.yml,
         - docker-compose-jenkins.yml,
         - docker/my.conf,
-        - docker_console/app_overrides.py,
-        - docker_console/config_overrides.py
+        - docker_console/dc_overrides.py,
+        - docker_console/dc_settings.py
 
     Files existing in project wrapper localization, by default will not be replaced.
 
@@ -288,8 +288,8 @@ without logging out.
 To initialize docker-console in drupal project you can either manually create following files:
 
 - docker-compose.yml,
-- docker_console/app_overrides.py,
-- docker_console/config_overrides.py
+- docker_console/dc_overrides.py,
+- docker_console/dc_settings.py
 
 |
 
@@ -304,12 +304,12 @@ command. This command will copy this files and some other additional files:
 
 |
 
-from default package templates to your project wrapper. If you are creating **docker_console/config_overrides.py** file manually,
+from default package templates to your project wrapper. If you are creating **docker_console/dc_settings.py** file manually,
 you should **look at the source of docker_console package conf/default.py** file to see what config options are available and what are default values.
 
 After that, you should adjust settings for your project in::
 
-    <project_name>/docker_console/config_overrides.py
+    <project_name>/docker_console/dc_settings.py
 
 file if needed.
 
@@ -382,7 +382,7 @@ to add autocomplete support for new aliases.
 
 To adjust configuration options you need to modify::
 
-    <project_name>/docker_console/config_overrides.py
+    <project_name>/docker_console/dc_settings.py
 
 file.
 
@@ -392,15 +392,74 @@ You can either modify default options values or add new options.
 
 |
 
-Example config_overrides.py file::
+Example dc_settings.py file for drupal7 web engine::
 
-    DB_NAME = "not_standard_db_name"
+    # import default values from drupal7 engine (required)
+    from docker_console.web.engines.drupal7.conf.default import *
 
-    DB_USER = "not_standard_db_username"
+    #################
+    # BASE SETTINGS #
+    #################
 
-    DB_PASSWORD = "not_standard_db_userpass"
+    WEB = {
+        'ENGINE': 'drupal7',
+        'USE_CUSTOM_ENGINE': False, # True/False - useful when we have default and custom engine with the same name
+        'APP_LOCATION': 'app',
+        'APP_CONF_LOCATION': 'app_conf',
+        'APP_DATA_LOCATION': 'app_data',
+        'TMP_PATH': '/tmp'
+    }
 
-    DRUPAL_LOCATION = "some_dir"
+    DB = {
+        'default': {
+            'DRIVER': 'mysql',
+            'HOST': 'mysql',
+            'NAME': 'db',
+            'USER': 'user',
+            'PASS': 'pass',
+            'ROOT_USER': 'root',
+            'ROOT_PASS': '123',
+            'DUMP_IMPORT_FILE': 'app_databases/database.sql.tar.gz',
+            'DUMP_EXPORT_LOCATION': 'app_databases/',
+        }
+    }
+
+    TESTS = {
+        'IMAGES': {
+            'selenium_image': ('selenium/standalone-chrome', None),
+            'codecept_image': ('droptica/codecept', None)
+        },
+        'LOCATION': "tests"
+    }
+
+    ENV = None
+
+    ####################
+    # DRUPAL7 SETTINGS #
+    ####################
+
+    DEV_DOCKER_IMAGES = {
+        'default': ('droptica/drupal-dev', None),
+        'additional_images': [
+    #     ('vendor/image_name', None), # image from dockerhub
+    #     ('vendor/image_name', 'path_to_dockerfile') # custom image from Dockerfile
+        ]
+    }
+
+    DRUPAL = {
+        'default': {
+            'ADMIN_USER': 'admin',
+            'ADMIN_PASS': '123',
+            'SITE_URI': 'default.dev',
+            'SITE_DIRECTORY': 'default',
+            'FILES_DST': 'sites/default/',
+            'PRIVATE_FILES_DST': 'sites/default/files/',
+            'FILES_ARCHIVE': 'app_files/files.tar.gz',
+            'PRIVATE_FILES_ARCHIVE': 'app_files/private.tar.gz',
+            'SETTINGS_TEMPLATE_SUBDIR': None,
+            'STAGE_FILE_PROXY_URL': None
+        }
+    }
 
 |
 
@@ -409,18 +468,18 @@ Example config_overrides.py file::
 
 To adjust classes methods or commands you need to modify::
 
-    <project_name>/docker_console/app_overrides.py
+    <project_name>/docker_console/dc_overrides.py
 
 file.
 
 You can either replace existing classes methods or add new methods. Methods from classes can be used create new or replace existing commands locally in project context.
 
-Example app_overrides.py file::
+Example dc_overrides.py file::
 
 
-    #import classes to override
-    from docker_console.drush import Drush
-    from docker_console.builder import Builder
+    # import classes to override
+    from docker_console.web.engines.drupal7.drush import Drush
+    from docker_console.web.engines.drupal7.builder import Builder
 
     # add new methods
     class DrushLocal:
@@ -437,14 +496,20 @@ Example app_overrides.py file::
 
     # override existing method
     def drush_uli_local(self):
-        print self.config.DRUPAL_ADMIN_USER
+        print self.config.DRUPAL[self.config.drupal_site]['ADMIN_USER']
 
     Drush.uli = drush_uli_local
 
 
     # replace/add new commands
-    build_arrays_overrides = {
-        'localtest': ['confirm_action', 'drush.localtest("upwd %s --password=123" % self.config.DRUPAL_ADMIN_USER)'],
-        'drush_uli': ['confirm_action("no")', 'drush.uli'],
+    commands_overrides = {
+        'localtest': [
+            'confirm_action',
+            'drush.localtest("upwd %s --password=123" % self.config.DRUPAL[self.config.drupal_site]["ADMIN_USER"])'
+        ],
+        'drush_uli': [
+            'confirm_action("no")',
+            'drush.uli'
+        ],
     }
 
