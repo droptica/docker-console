@@ -17,11 +17,11 @@ class DrupalSettings:
                 for name in files:
                     os.chmod(os.path.join(root, name), 0777)
 
-    def copy_settings(self, type):
+    def copy_settings(self, type = 'drupal7'):
         msg('Copy settings')
         dst = os.path.join(self.config.WEB['APP_ROOT'], 'sites/', self.config.DRUPAL[self.config.drupal_site]['SITE_DIRECTORY'])
 
-        if hasattr(self.config, 'SETTINGS_TEMPLATE_SUBDIR') and self.config.DRUPAL[self.config.drupal_site]['SETTINGS_TEMPLATE_SUBDIR'] is not None:
+        if 'SETTINGS_TEMPLATE_SUBDIR' in self.config.DRUPAL[self.config.drupal_site] and self.config.DRUPAL[self.config.drupal_site]['SETTINGS_TEMPLATE_SUBDIR'] is not None:
             settings_dir_path = os.path.join(self.config.BUILD_PATH, self.config.WEB['APP_CONF_LOCATION'], self.config.DRUPAL[self.config.drupal_site]['SETTINGS_TEMPLATE_SUBDIR'])
         else:
             settings_dir_path = os.path.join(self.config.BUILD_PATH, self.config.WEB['APP_CONF_LOCATION'])
