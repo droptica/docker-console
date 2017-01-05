@@ -39,7 +39,7 @@ TESTS = {
 ENV = None
 
 ####################
-# DRUPAL7 SETTINGS #
+# DRUPAL8 SETTINGS #
 ####################
 
 DEV_DOCKER_IMAGES = {
