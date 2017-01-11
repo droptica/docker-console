@@ -1,6 +1,6 @@
 # # import classes to override
-# from docker_console.web.engines.drupal7.drush import Drush
-# from docker_console.web.engines.drupal7.builder import Builder
+# from docker_console.web.engines.drupal8.drush import Drush
+# from docker_console.web.engines.drupal8.builder import Builder
 #
 # # add new methods
 # class DrushLocal:

@@ -1,12 +1,12 @@
-# import default values from drupal7 engine (required)
-from docker_console.web.engines.drupal7.conf.default import *
+# import default values from drupal8 engine (required)
+from docker_console.web.engines.drupal8.conf.default import *
 
 #################
 # BASE SETTINGS #
 #################
 
 WEB = {
-    'ENGINE': 'drupal7',
+    'ENGINE': 'drupal8',
     'USE_CUSTOM_ENGINE': False, # True/False - useful when we have default and custom engine with the same name
     'APP_LOCATION': 'app',
     'APP_CONF_LOCATION': 'app_conf',
