@@ -159,6 +159,7 @@ Note that **docker-console** can be also run by **dcon**. This commands are equi
     |
 
     Options:
+
     \--tpl
         This is required param that specifies the template that is used to init docker in project wrapper.
 
