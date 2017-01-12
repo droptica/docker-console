@@ -15,7 +15,7 @@ Requirements for docker-console:
 
 * python-pip package::
 
-    sudo apt-get update && sudo apt-get -y install python-pip
+    sudo apt-get update && sudo apt-get -y install python-yaml python-setuptools python-pip python-dev build-essential
 
 |
 
@@ -64,6 +64,8 @@ without logging out.
 **Available commands and options**
 ==================================
 
+Note that **docker-console** can be also run by **dcon**. This commands are equivalent.
+
 |
 
 **Commands that can be run from anywhere**
@@ -101,22 +103,68 @@ without logging out.
 |
 
 - init:
-    This command is copying following files from docker-console default templates to project wrapper:
-        - docker-compose.yml,
-        - docker-compose-jenkins.yml,
-        - docker/my.conf,
-        - docker_console/dc_overrides.py,
-        - docker_console/dc_settings.py
+- init-tests:
+    This commands are copying files from selected template directory to project wrapper.
 
-    Files existing in project wrapper localization, by default will not be replaced.
+    Default **docker init** template is:
+        - drupal7
+
+    Default **tests init** template is:
+        - drupal7
+
+
+    To **init docker** in drupal7 project, you need to run::
+
+        docker-console init --tpl drupal7
+
+    To **init tests** in drupal7 project, you need to run::
+
+        docker-console init-tests --tpl drupal7
+
+    You can also create own custom docker init and tests init templates.
+
+    Custom **docker init** templates have to be placed in::
+
+        ~/.docker_console/custom_docker_init_templates/
+
+
+    Custom **tests init** templates have to be placed in::
+
+        ~/.docker_console/custom_tests_init_templates/
+
+    Each template should be separate directory that contains files which will be copied to project wrapper.
+    Init template can have any directory structure and can contain any type of files.
+    Files in init template that ends with '-tpl' will be processed during init and '{{HOST}}' variable will be replaced by host name generated based on project dir name (eg. examplesite.dev).
+    Custom init template directory name will be init template name.
+
+    Eg. when custom **docker init** template directory will be::
+
+        ~/.docker_console/custom_docker_init_templates/example_custom_init_template
+
+    then in project wrapper you can run::
+
+        docker-console init --tpl example_custom_init_template
+
+    When custom **tests init** template directory will be::
+
+        ~/.docker_console/custom_tests_init_templates/example_custom_tests_init_template
+
+    then in project wrapper you can run::
+
+        docker-console init-tests --tpl example_custom_tests_init_template
+
+
+    Files existing in project wrapper localization, by default will not be replaced. If you want to force replace files, you need to use '-f' or '--force-replace-conf' option.
 
     |
 
     Options:
+    \--tpl
+        This is required param that specifies the template that is used to init docker in project wrapper.
 
     \-f, \--force-replace-conf
-        Set if you want force replace your existing config files listed above.
-        All your changes in listed files will be irrevocably lost. Other files in wrapper folder and 'docker' folder will stay unchanged.
+        Set if you want force replace your existing wrapper files with this from template.
+        All your changes in wrapper files will be irrevocably lost. Other files in wrapper folder and 'docker' folder will stay unchanged.
 
 |
 
@@ -192,8 +240,23 @@ without logging out.
 
 |
 
+- update-images:
+    Stop and remove project containers, pull and build images from docker-compose.yml, DEV_DOCKER_IMAGES and TESTS['IMAGES'] configs. Then starts containers from docker-compose.yml.
+
+|
+
 - stop:
-    Stops all containers that were started for current project.
+    Stops all containers that were started for current project, without removing containers.
+
+|
+
+- rm:
+    Stops all containers that were started for current project and removes related containers.
+
+|
+
+- rmi:
+    Stops all containers that were started for current project, removes related containers and related images.
 
 |
 
@@ -205,6 +268,44 @@ without logging out.
 
 |
 
+- codecept:
+    This command allows to run any codeception command.
+
+|
+
+- test:
+    This command runs all tests available in tests location.
+    You can also run single test files using argument like **testSuite/testName**. By default tests are run with options --xml --html (codeception run command options).
+    Tests can also be run by command::
+
+        docker-console codecept run
+
+|
+
+- config-prepare:
+    This command copies the docker-compose-template.yml to docker-compose.yml with replaced variables from .env file.
+
+|
+
+- show-ip:
+    Shows web container IP address.
+
+|
+
+- show-nginx-proxy-ip:
+    Shows nginx container IP address.
+
+|
+
+- dump:
+    This command exports project database to DUMP_EXPORT_LOCATION in DB setting.
+
+|
+
+
+**Commands for drupal web engine**
+==================================
+
 - drush:
     Allows for running any drush command inside docker.
 
@@ -214,11 +315,6 @@ without logging out.
 
     \-e, \--drush-eval-run-code
         Set if you want run code in drush eval.
-
-|
-
-- jenkins-prepare:
-    Adds configuration options that are needed to run project on Jenkins environment.
 
 |
 
@@ -274,45 +370,117 @@ without logging out.
     Yes to all questions where 'confirm_action' is used in command action steps
 
 |
+
+- \--db
+    Set the database you want to work on.
+
+|
 |
 
-=============================
-**Usage with Drupal project**
-=============================
+
+**Drupal engine specific global options**
+=========================================
+
+- \--site
+    Set the drupal site you want to work on.
+
+
+|
+|
+
+==============
+**DB drivers**
+==============
+By default, there is available mysql DB driver. This is set in DRIVER param in DB config in <project_name>/docker_console/dc_settings.py::
+
+    DB = {
+        'default': {
+            'DRIVER': 'mysql',
+            ...
+        ...
+
+|
+|
+
+===============
+**Web engines**
+===============
+By default, there is available drupal7 web engine. New custom engines can be created locally in user home directory. Custom web engines have to be placed in::
+
+    ~/.docker_console/custom_web_engines/
+
+Custom web engine have to contain following files:
+    - config/default.py, containing at least line with importing of default config from base engine::
+
+        from docker_console.web.engines.base.conf.default import *
+
+    - builder.py, containing at least Builder class that inherits BaseBuilder class from base engine::
+
+        class Builder(BaseBuilder):
+            def __init__(self, config):
+                super(Builder, self).__init__(config)
+
+    - commands.py, containing at least line with importing of default commands from base engine::
+
+        from docker_console.web.engines.base.commands import commands
+
+Web engines are python modules, therefore on each directory level you need to add empty files __init__.py. For basic custom web engine this would be::
+
+    ~/.docker_console/custom_web_engines/custom_engine_name/__init__.py
+    ~/.docker_console/custom_web_engines/custom_engine_name/conf/__init__.py
+
+If you would like to create custom web engine that overrides other default classes like 'BaseDocker' or 'BaseTests', please look at drupal7 default web engine as an example.
+
+|
+
+To use custom web engine you need to:
+    - at the top of <project_name>/docker_console/dc_settings.py, replace line::
+
+        from docker_console.web.engines.{default_engine_name}.conf.default import *
+
+    with::
+
+        from custom_web_engines.{custom_engine_name}.conf.default import *
+
+    - set ENGINE param in WEB config in <project_name>/docker_console/dc_settings.py to your web engine name,
+    - set USE_CUSTOM_ENGINE param in WEB config in <project_name>/docker_console/dc_settings.py to True, eg::
+
+        WEB = {
+            'ENGINE': 'custom_engine_name',
+            'USE_CUSTOM_ENGINE': True,
+            ...
+
+    - if you would like to override something from your custom web engine in <project_name>/docker_console/dc_overrides.py, you need to remember to import classes from this custom engine, so import lines should looks like::
+
+        from custom_web_engines.{custom_engine_name}.builder import Builder
+
+
+Note that this is possible to have custom web engine with the same name as default ones.
+If you will have such custom web engine but for some projects you would like to use default engine just set USE_CUSTOM_ENGINE param in WEB config to False.
+
+|
+|
+
+======================
+**Usage with project**
+======================
 
 |
 
 **docker-console initialization in drupal project**
 ===================================================
 
-To initialize docker-console in drupal project you can either manually create following files:
+To initialize docker-console in drupal project you should use command::
 
-- docker-compose.yml,
-- docker_console/dc_overrides.py,
-- docker_console/dc_settings.py
+    docker-console init --tpl init_template_name
 
-|
-
-, or run::
-
-    docker-console init
-
-command. This command will copy this files and some other additional files:
-
-- docker-compose-jenkins.yml,
-- docker/my.conf,
+This command will copy init template files to project wrapper. See description of '- init' command for details.
 
 |
 
-from default package templates to your project wrapper. If you are creating **docker_console/dc_settings.py** file manually,
-you should **look at the source of docker_console package conf/default.py** file to see what config options are available and what are default values.
-
-After that, you should adjust settings for your project in::
+After that, if needed, you should adjust settings for your project in::
 
     <project_name>/docker_console/dc_settings.py
-
-file if needed.
-
 
 |
 
@@ -323,12 +491,12 @@ To add config entry for project to /etc/hosts you need to run::
 
     docker-console add-host-to-etc-hosts
 
-This command will run docker for current project and add entry to /etc/hosts with IP Address taken from web container
+This command adds entry to /etc/hosts with IP Address taken from nginx-proxy container
 and hosts names taken from VIRTUAL_HOST variable for web and phpmyadmin containers configuration in docker-compose.yml
 
 |
 
-**Adding Project Aliases**
+**Adding project aliases**
 ==========================
 
 docker-console application allows for defining project aliases like in drush. In alias configuration there is only project wrapper path configuration. This path should be absolute.
@@ -474,7 +642,7 @@ file.
 
 You can either replace existing classes methods or add new methods. Methods from classes can be used create new or replace existing commands locally in project context.
 
-Example dc_overrides.py file::
+Example dc_overrides.py file for drupal7 web engine::
 
 
     # import classes to override
