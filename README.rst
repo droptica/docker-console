@@ -103,6 +103,7 @@ Note that **docker-console** can be also run by **dcon**. This commands are equi
 |
 
 - init:
+
 - init-tests:
     This commands are copying files from selected template directory to project wrapper.
 
