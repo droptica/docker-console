@@ -21,8 +21,7 @@ drupal_commands = {
         'database.drop_db',
         'database.create_db',
         'database.import_db',
-        'drush.en("devel")',
-        'drush.run("cc all")',
+        'drush.run("cache-rebuild")',
         'drush.run("uli")'
     ],
     'drush': [
