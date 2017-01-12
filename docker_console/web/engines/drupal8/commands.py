@@ -17,11 +17,11 @@ drupal_commands = {
         'chmod_files'
     ],
     'build-in-docker': [
-        'drupal_settings.copy_settings("drupal7")',
+        'drupal_settings.copy_settings("drupal8")',
         'database.drop_db',
         'database.create_db',
         'database.import_db',
-        'drush.run("cc all")',
+        'drush.run("cache-rebuild")',
         'drush.run("uli")'
     ],
     'drush': [
