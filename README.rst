@@ -103,7 +103,6 @@ Note that **docker-console** can be also run by **dcon**. This commands are equi
 |
 
 - init:
-
 - init-tests:
     This commands are copying files from selected template directory to project wrapper.
 
@@ -440,7 +439,7 @@ To use custom web engine you need to:
 
         from docker_console.web.engines.{default_engine_name}.conf.default import *
 
-    with::
+      with::
 
         from custom_web_engines.{custom_engine_name}.conf.default import *
 
