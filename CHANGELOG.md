@@ -4,6 +4,11 @@
 
 ### 
 
+* 2aa0105 (2017-01-19) [Damian Sikora]
+
+  add changelog
+
+
 * ad8d65c (2017-01-19) [Damian Sikora]
 
   add changelog
@@ -149,23 +154,24 @@
 * 1d6f590 (2016-12-13) [Damian Sikora]
 
   improvements:
-  -update 'restart' command to neither remove containers nor update images during restart
-  -move codecept image from additional_images to separate entry in DEV_DOCKER_IMAGES config
-  -add selenium_image entry in DEV_DOCKER_IMAGES config and use in 'test' command
-  -add TESTS_LOCATION config and use in 'test' config
-  -fix typo 'ngnix-proxy' in Docker.get_nginx_proxy_ip function
+  - update 'restart' command to neither remove containers nor update images during restart
+  - move codecept image from additional_images to separate entry in DEV_DOCKER_IMAGES config
+  - add selenium_image entry in DEV_DOCKER_IMAGES config and use in 'test' command
+  - add TESTS_LOCATION config and use in 'test' config
+  - fix typo 'ngnix-proxy' in Docker.get_nginx_proxy_ip function
 
 
 * b0666e4 (2016-12-12) [Damian Sikora]
 
-  change default 'up', 'start' and 'up-and-build' commands behavior to not pull or build images
-  added new command 'update-images' that pulls and builds images
-  change default 'stop' command behavior to not remove containers after stop
-  added new command 'rm' that stops and removes project containers
-  added new command 'rmi' that stops and removes project containers and related images if possible (without force)
-  updated 'test' command to use default testing image (droptica/codecept)
-  updated method 'Docker._get_hosts' to add links to containers with name from docker-compose.yml config
-  added new command 'dump' that dumps project database to databases dir in project wrapper
+  improvements:
+  - change default 'up', 'start' and 'up-and-build' commands behavior to not pull or build images
+  - added new command 'update-images' that pulls and builds images
+  - change default 'stop' command behavior to not remove containers after stop
+  - added new command 'rm' that stops and removes project containers
+  - added new command 'rmi' that stops and removes project containers and related images if possible (without force)
+  - updated 'test' command to use default testing image (droptica/codecept)
+  - updated method 'Docker._get_hosts' to add links to containers with name from docker-compose.yml config
+  - added new command 'dump' that dumps project database to databases dir in project wrapper
 
 
 
