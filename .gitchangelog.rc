@@ -90,7 +90,7 @@ section_regexps = [
         r'^[fF]ix\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
      ]),
 
-    ('Other', None ## Match all lines
+    ('', None ## Match all lines
      ),
 
 ]
@@ -152,7 +152,7 @@ tag_filter_regexp = r'^v[0-9]+\.[0-9]+(\.[0-9]+)?$'
 ##
 ## This label will be used as the changelog Title of the last set of changes
 ## between last valid tag and HEAD if any.
-unreleased_version_label = "%%version%% (unreleased)"
+unreleased_version_label = "(unreleased)"
 
 
 ## ``output_engine`` is a callable
@@ -185,8 +185,8 @@ unreleased_version_label = "%%version%% (unreleased)"
 ##
 #output_engine = rest_py
 #output_engine = mustache("restructuredtext")
-#output_engine = mustache("markdown")
-output_engine = makotemplate("restructuredtext")
+output_engine = mustache("markdown")
+#output_engine = makotemplate("restructuredtext")
 
 
 ## ``include_merge`` is a boolean
