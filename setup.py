@@ -11,15 +11,6 @@ try:
 except IOError:
     long_description = ''
 
-os_commands = {
-    'Ubuntu': {
-        'package_install': 'apt-get -y install',
-    },
-    'debian': {
-        'package_install': 'apt-get -y install',
-    },
-}
-
 class custom_install(install):
     def copy_docker_drupal_files(self, home_docker_console_dir):
         home_docker_drupal_dir = os.path.join(os.path.expanduser('~'), '.docker_drupal', 'aliases')
@@ -27,8 +18,6 @@ class custom_install(install):
             create_dir_copy(home_docker_drupal_dir, home_docker_console_dir)
 
     def pre_install(self):
-        os_dist = platform.dist()
-        os.system('%s python-yaml' % (os_commands[os_dist[0]]['package_install']))
         home_docker_console_dir = os.path.join(os.path.expanduser('~'), '.docker_console', 'aliases')
         self.copy_docker_drupal_files(home_docker_console_dir)
         if not os.path.exists(home_docker_console_dir):
@@ -43,6 +32,7 @@ class custom_install(install):
         if not os.path.exists(init_file_path):
             aliases = open(init_file_path, 'w')
             aliases.close()
+        #TODO: create other home dir files
 
     def run(self):
         self.pre_install()
