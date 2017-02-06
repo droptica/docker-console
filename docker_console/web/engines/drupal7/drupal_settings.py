@@ -17,7 +17,7 @@ class DrupalSettings:
                 for name in files:
                     os.chmod(os.path.join(root, name), 0777)
 
-    def copy_settings(self, type = 'drupal8'):
+    def copy_settings(self, type = 'drupal7', remove_existing = True):
         msg('Copy settings')
         dst = os.path.join(self.config.WEB['APP_ROOT'], 'sites/', self.config.DRUPAL[self.config.drupal_site]['SITE_DIRECTORY'])
 
@@ -30,7 +30,7 @@ class DrupalSettings:
             for root, dirs, files in os.walk(settings_dir_path):
                 for name in files:
                     dst_file = os.path.join(dst, name)
-                    if os.path.exists(dst_file):
+                    if remove_existing and os.path.exists(dst_file):
                         os.remove(dst_file)
                     src = os.path.join(root, name)
                     shutil.copyfile(
@@ -40,7 +40,7 @@ class DrupalSettings:
         else:
             src = os.path.join(settings_dir_path, 'settings.php')
             dst_file = os.path.join(dst, 'settings.php')
-            if os.path.exists(dst_file):
+            if remove_existing and os.path.exists(dst_file):
                 os.remove(dst_file)
             shutil.copyfile(
                 src,
