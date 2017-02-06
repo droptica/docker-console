@@ -17,7 +17,7 @@ class DrupalSettings:
                 for name in files:
                     os.chmod(os.path.join(root, name), 0777)
 
-    def copy_settings(self, type = 'drupal8', remove_existing = True):
+    def copy_settings(self, type = 'drupal8', remove_existing=False):
         msg('Copy settings')
         dst = os.path.join(self.config.WEB['APP_ROOT'], 'sites/', self.config.DRUPAL[self.config.drupal_site]['SITE_DIRECTORY'])
 
