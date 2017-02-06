@@ -17,7 +17,7 @@ class DrupalSettings:
                 for name in files:
                     os.chmod(os.path.join(root, name), 0777)
 
-    def copy_settings(self, type = 'drupal7'):
+    def copy_settings(self, type = 'drupal8'):
         msg('Copy settings')
         dst = os.path.join(self.config.WEB['APP_ROOT'], 'sites/', self.config.DRUPAL[self.config.drupal_site]['SITE_DIRECTORY'])
 
@@ -26,18 +26,23 @@ class DrupalSettings:
         else:
             settings_dir_path = os.path.join(self.config.BUILD_PATH, self.config.WEB['APP_CONF_LOCATION'])
 
-        #TODO: temporary solution, until drupal8 web engine will be ready
         if type == 'drupal8':
             for root, dirs, files in os.walk(settings_dir_path):
                 for name in files:
+                    dst_file = os.path.join(dst, name)
+                    if os.path.exists(dst_file):
+                        os.remove(dst_file)
                     src = os.path.join(root, name)
                     shutil.copyfile(
                         src,
-                        os.path.join(dst, name)
+                        dst_file
                     )
         else:
             src = os.path.join(settings_dir_path, 'settings.php')
+            dst_file = os.path.join(dst, 'settings.php')
+            if os.path.exists(dst_file):
+                os.remove(dst_file)
             shutil.copyfile(
                 src,
-                os.path.join(dst, 'settings.php')
+                dst_file
             )

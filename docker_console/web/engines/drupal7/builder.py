@@ -27,4 +27,11 @@ class Builder(BaseBuilder):
             self.archive = Archive(self.config)
 
     def chmod_files(self):
-        run_cmd('chmod 777 -Rf %s' % os.path.join(self.config.WEB['APP_ROOT'], self.config.DRUPAL[self.config.drupal_site]['FILES_DST'], 'files'))
+        for site in self.config.DRUPAL:
+            run_cmd('chmod -Rf 777 %s' % os.path.join(self.config.WEB['APP_ROOT'],
+                                                      self.config.DRUPAL[site]['FILES_DST'], 'files'))
+
+    def chmod_private_files(self):
+        for site in self.config.DRUPAL:
+            run_cmd('chmod -Rf 777 %s' % os.path.join(self.config.WEB['APP_ROOT'],
+                                                      self.config.DRUPAL[site]['PRIVATE_FILES_DST'], 'private'))

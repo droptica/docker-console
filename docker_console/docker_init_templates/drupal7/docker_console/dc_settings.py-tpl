@@ -57,7 +57,7 @@ DRUPAL = {
         'SITE_URI': '{{HOST}}',
         'SITE_DIRECTORY': 'default',
         'FILES_DST': 'sites/default/',
-        'PRIVATE_FILES_DST': 'sites/default/files/',
+        'PRIVATE_FILES_DST': 'sites/default/',
         'FILES_ARCHIVE': 'app_files/files.tar.gz',
         'PRIVATE_FILES_ARCHIVE': 'app_files/private.tar.gz',
         'SETTINGS_TEMPLATE_SUBDIR': None,

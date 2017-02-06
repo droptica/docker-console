@@ -38,4 +38,5 @@ class Docker(BaseDocker):
         self.docker_drush(cmd)
 
     def docker_drush(self, cmd=''):
-        self.docker_run('drush -r %s %s' % (os.path.join('/app', self.config.WEB['APP_LOCATION']), cmd))
+        uri = self.config.DRUPAL[self.config.drupal_site]['SITE_URI']
+        self.docker_run('drush -r %s --uri=%s %s' % (os.path.join('/app', self.config.WEB['APP_LOCATION']), uri, cmd))

@@ -6,7 +6,8 @@ drupal_commands = {
         'docker.docker_run("docker-console build-in-docker")',
         'docker.chown',
         'docker.setfacl',
-        'chmod_files'
+        'chmod_files',
+        'chmod_private_files'
     ],
     'up-and-build': [
         'confirm_action',
@@ -14,7 +15,8 @@ drupal_commands = {
         'docker.docker_run("docker-console build-in-docker")',
         'docker.chown',
         'docker.setfacl',
-        'chmod_files'
+        'chmod_files',
+        'chmod_private_files'
     ],
     'build-in-docker': [
         'drupal_settings.copy_settings("drupal7")',
