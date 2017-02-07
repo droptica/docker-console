@@ -1,0 +1,27 @@
+web:
+  image: droptica/drupal-apache:xdebug
+  volumes:
+    - ./app:/var/www/html
+#    - ./docker/custom_config/php.ini:/usr/local/etc/php/conf.d/php.ini:ro # enable xdebug
+  links:
+    - mysql:mysql
+  environment:
+    VIRTUAL_HOST: {{HOST}},www.{{HOST}}
+
+mysql:
+  image: mysql:5.6
+  volumes:
+    - ./app_data/database:/var/lib/mysql
+    - ./docker/custom_config/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+  environment:
+    MYSQL_ROOT_PASSWORD: 123
+    MYSQL_DATABASE: db
+    MYSQL_USER: user
+    MYSQL_PASSWORD: pass
+
+phpmyadmin:
+  image: nazarpc/phpmyadmin
+  links:
+    - mysql:mysql
+  environment:
+      VIRTUAL_HOST: phpmyadmin.{{HOST}}

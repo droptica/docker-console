@@ -1,0 +1,81 @@
+Global:
+  ### required ###
+  title:
+    machineName:    title
+    label:          Title
+    type:           Node module element
+    selector:       "edit-title"
+
+  body:
+    selector:       "edit-body-und"
+  ### end required ###
+
+  # fields with additional fields
+#  field_date:
+#    additional_config:
+#      action: add
+#      fields:
+#        field_date_time_part:
+#          machineName:    field_date_time_part
+#          label:          label
+#          type:           type eg. Text
+#          widget:         widget eg. Text field
+#          required:       true or false
+#          selector:       "selector"
+
+  # embeded fields
+#  field_that_contains_embeded_fields:
+#    additional_config:
+#      action: replace
+#      fields:
+#        field_that_contains_embeded_fields_field_a:
+#          machineName:    machineName
+#          label:          label
+#          type:           type eg. Text
+#          widget:         widget eg. Text field
+#          required:       true or false
+#          selector:       "selector"
+#
+#        field_that_contains_embeded_fields_field_b:
+#          machineName:    machineName
+#          label:          label
+#          type:           type eg. Text
+#          widget:         widget eg. Text field
+#          required:       true or false
+#          selector:       "selector"
+
+# Example for custom fields per content type
+#ContentTypes:
+#  content_type_1:
+#    field_that_contains_embeded_fields:
+#      additional_config:
+#        action: replace
+#        fields:
+#          field_that_contains_embeded_fields_field_a:
+#            machineName:    machineName
+#            label:          label
+#            type:           type eg. Text
+#            widget:         widget eg. Text field
+#            required:       true or false
+#            selector:       "selector"
+#
+#          field_that_contains_embeded_fields_field_b:
+#            machineName:    machineName
+#            label:          label
+#            type:           type eg. Text
+#            widget:         widget eg. Text field
+#            required:       true or false
+#            selector:       "selector"
+#
+#  content_type_2:
+#    field_date:
+#      additional_config:
+#        action: add
+#        fields:
+#          field_date_time_part:
+#            machineName:    field_date_time_part
+#            label:          label
+#            type:           type eg. Text
+#            widget:         widget eg. Text field
+#            required:       true or false
+#            selector:       "selector"

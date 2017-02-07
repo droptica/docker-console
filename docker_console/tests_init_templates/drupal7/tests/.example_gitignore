@@ -1,0 +1,4 @@
+/tests/tests/_output/
+!tests/_output/README.txt
+/tests/tests/_support/_generated/*
+/tests/_data/dump.sql
