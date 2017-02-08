@@ -20,24 +20,20 @@ commands = {
         'docker.docker_shell'
     ],
     'start': [
-        'docker.docker_up',
-        'chmod_files'
+        'docker.docker_up'
     ],
     'up': [
-        'docker.docker_up',
-        'chmod_files'
+        'docker.docker_up'
     ],
     'update-images': [
-        'docker.docker_update_images',
-        'chmod_files'
+        'docker.docker_update_images'
     ],
 
     'stop': [
         'docker.docker_stop'
     ],
     'restart': [
-        'docker.docker_restart',
-        'chmod_files'
+        'docker.docker_restart'
     ],
 
     'rm': [

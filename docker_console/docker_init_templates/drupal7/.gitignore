@@ -1,0 +1,14 @@
+.env
+.idea
+*.pyc
+
+app
+
+app_data/*
+!app_data/README.txt
+
+app_databases/*
+!app_databases/README.txt
+
+app_files/*
+!app_files/README.txt

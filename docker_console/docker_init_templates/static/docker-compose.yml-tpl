@@ -1,0 +1,6 @@
+web:
+  image: droptica/drupal-apache:xdebug
+  volumes:
+    - ./app:/var/www/html
+  environment:
+    VIRTUAL_HOST: {{HOST}},www.{{HOST}}
