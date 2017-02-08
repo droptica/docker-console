@@ -1,0 +1,34 @@
+# import default values from static engine (required)
+from docker_console.web.engines.static.conf.default import *
+
+#################
+# BASE SETTINGS #
+#################
+
+WEB = {
+    'ENGINE': 'static',
+    'USE_CUSTOM_ENGINE': False, # True/False - useful when we have default and custom engine with the same name
+    'APP_LOCATION': 'app'
+}
+
+TESTS = {
+    'IMAGES': {
+        'selenium_image': ('selenium/standalone-chrome', None),
+        'codecept_image': ('droptica/codecept', None)
+    },
+    'LOCATION': "tests"
+}
+
+ENV = None
+
+####################
+# SITE SETTINGS #
+####################
+
+DEV_DOCKER_IMAGES = {
+    'default': ('droptica/drupal-dev', None),
+    'additional_images': [
+#     ('vendor/image_name', None), # image from dockerhub
+#     ('vendor/image_name', 'path_to_dockerfile') # custom image from Dockerfile
+    ]
+}
