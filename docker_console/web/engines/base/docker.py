@@ -129,7 +129,7 @@ class BaseDocker(object):
         for DEV_DOCKER_IMAGE, DEV_DOCKER_IMAGE_DOCKERFILE in ALL_DEV_DOCKER_IMAGES:
             run_cmd('docker pull %s' % DEV_DOCKER_IMAGE)
             if DEV_DOCKER_IMAGE_DOCKERFILE is not None:
-                run_cmd('docker build --no-cache -t %s %s' %
+                run_cmd('docker build --no-cache --pull -t %s %s' %
                         (DEV_DOCKER_IMAGE, os.path.join(self.config.BUILD_PATH, DEV_DOCKER_IMAGE_DOCKERFILE)),
                         cwd=self.config.BUILD_PATH)
 
