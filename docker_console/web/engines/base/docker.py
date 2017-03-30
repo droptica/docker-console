@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import yaml
+import hashlib
 from distutils import dir_util
 from docker_console import cmd_options
 from docker_console.bash_completion import setup_autocomplete
@@ -24,7 +25,10 @@ class BaseDocker(object):
                         'specify absolute path to project wrapper by -p (--docker-run-path) option\n'
                         'create alias with your project wrapper path in ~/.docker_console/aliases (then docker-console @project_dev)', 'warning')
             exit(0)
-        self.compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '-template.yml')
+        compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker', 'compose_templates', 'docker-compose' + env + '-template.yml')
+        if not os.path.isfile(compose_template_path):
+            compose_template_path = os.path.join(self.config.BUILD_PATH, 'docker-compose' + env + '-template.yml')
+        self.compose_template_path = compose_template_path
         self.base_alias = self.get_project_name(self.config.BUILD_PATH)
 
     def get_project_name(self, working_dir, project_name=None):
@@ -104,14 +108,27 @@ class BaseDocker(object):
     def docker_run(self, cmd):
         run_cmd(self.docker_command() + ' ' + cmd)
 
+    def docker_run_cmd(self):
+        cmd = ' '.join(self.config.args[2:])
+        self.docker_run('bash -c "' + cmd + '"')
+
     def docker_up(self):
         run_cmd('docker-compose up -d', cwd=self.config.BUILD_PATH)
+
+    def get_image_id(self, image):
+        image_id = run_cmd('docker inspect --format "{{ .ID }}" --type "image" %s' % image,
+                                               return_output=True)
+        match = re.search('Error: No such image', image_id)
+        print image_id
+        if match is not None:
+            return False
+        return image_id
 
     def docker_update_images(self):
         run_cmd('docker-compose stop', cwd=self.config.BUILD_PATH)
         run_cmd('docker-compose rm -f', cwd=self.config.BUILD_PATH)
         run_cmd('docker-compose pull', cwd=self.config.BUILD_PATH)
-        run_cmd('docker-compose build', cwd=self.config.BUILD_PATH)
+        run_cmd('docker-compose build --pull', cwd=self.config.BUILD_PATH)
 
         ALL_DEV_DOCKER_IMAGES = []
         for image in self.config.DEV_DOCKER_IMAGES:
@@ -126,14 +143,62 @@ class BaseDocker(object):
             elif isinstance(self.config.TESTS['IMAGES'][image], list):
                 ALL_DEV_DOCKER_IMAGES += self.config.TESTS['IMAGES'][image]
 
-        for DEV_DOCKER_IMAGE, DEV_DOCKER_IMAGE_DOCKERFILE in ALL_DEV_DOCKER_IMAGES:
-            run_cmd('docker pull %s' % DEV_DOCKER_IMAGE)
-            if DEV_DOCKER_IMAGE_DOCKERFILE is not None:
-                run_cmd('docker build --no-cache --pull -t %s %s' %
-                        (DEV_DOCKER_IMAGE, os.path.join(self.config.BUILD_PATH, DEV_DOCKER_IMAGE_DOCKERFILE)),
-                        cwd=self.config.BUILD_PATH)
+        custom_images_hashes_path = os.path.join(self.config.BUILD_PATH, 'docker', 'custom_images', 'hashes.yml')
+        hashes_content = {}
+        if os.path.exists(custom_images_hashes_path):
+            custom_images_hashes = open(custom_images_hashes_path)
+            hashes_content = yaml.load(custom_images_hashes)
+            custom_images_hashes.close()
+            if type(hashes_content) is not dict:
+                hashes_content = {}
 
-        run_cmd('docker-compose up -d', cwd=self.config.BUILD_PATH)
+        for DEV_DOCKER_IMAGE, DEV_DOCKER_IMAGE_DOCKERFILE_PATH in ALL_DEV_DOCKER_IMAGES:
+            if DEV_DOCKER_IMAGE_DOCKERFILE_PATH is not None:
+                needs_rebuild = False
+                dockerfile = open(DEV_DOCKER_IMAGE_DOCKERFILE_PATH + '/Dockerfile')
+                dockerfile_content = dockerfile.read()
+
+                # Pull images that custom images inherits from. If inherited image has changed, rebuild custom image.
+                images_found = re.findall('FROM (.+)', dockerfile_content)
+                images_ids = ''
+                for image in images_found:
+                    message('Pulling image %s that is used as base image in %s custom image.' % (image, DEV_DOCKER_IMAGE), 'info')
+                    run_cmd('docker pull %s' % image)
+                    image_id = self.get_image_id(image)
+                    if image_id:
+                        images_ids += image_id
+
+                # Create hash from base image id and dockerfile content and check if it has changed, if yes rebuild it.
+                # This also handles the situation when base image will be updated manually
+                # or from other project thanks to base image id checking.
+                dockerfile_hash = hashlib.md5(images_ids + dockerfile_content).hexdigest()
+
+                if not needs_rebuild and DEV_DOCKER_IMAGE not in hashes_content:
+                    message('Hash for image %s not found in %s. '
+                            'Custom image will be rebuilt as we can\'t check whether it is up to date or not.'
+                            % (DEV_DOCKER_IMAGE, custom_images_hashes_path)
+                            , 'info')
+                    needs_rebuild = True
+
+                if not needs_rebuild and hashes_content[DEV_DOCKER_IMAGE] != dockerfile_hash:
+                    message('Docker file for image %s was changed or base image was updated so image will be rebuilt.' % DEV_DOCKER_IMAGE, 'info')
+                    needs_rebuild = True
+
+                hashes_content[DEV_DOCKER_IMAGE] = dockerfile_hash
+
+                if needs_rebuild:
+                    run_cmd('docker build --no-cache --pull -t %s %s' %
+                            (DEV_DOCKER_IMAGE, os.path.join(self.config.BUILD_PATH, DEV_DOCKER_IMAGE_DOCKERFILE_PATH)),
+                            cwd=self.config.BUILD_PATH)
+                else:
+                    message('Image %s is up to date and will not be rebuilt.' % DEV_DOCKER_IMAGE, 'info')
+            else:
+                run_cmd('docker pull %s' % DEV_DOCKER_IMAGE)
+
+        if len(hashes_content.keys()) > 0:
+            custom_images_hashes = open(custom_images_hashes_path, 'w')
+            yaml.dump(hashes_content, custom_images_hashes, default_flow_style=False)
+            custom_images_hashes.close()
 
     def docker_stop(self):
         run_cmd('docker-compose stop', cwd=self.config.BUILD_PATH)

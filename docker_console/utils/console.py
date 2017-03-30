@@ -79,9 +79,16 @@ def message(message, type=""):
 def run(command, cwd=None, return_output=False):
     try:
         message('Run: "' + command + '"')
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, cwd=cwd)
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
         while True:
-            output = process.stdout.readline()
+            if return_output:
+                error_lines = process.stderr.readlines()
+                output = ''.join(error_lines)
+                output_lines = process.stdout.readlines()
+                output += ''.join(output_lines)
+            else:
+                output = process.stdout.readline()
+
             if output == '' and process.poll() is not None:
                 break
             if output:
