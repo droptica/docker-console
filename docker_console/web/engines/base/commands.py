@@ -19,6 +19,9 @@ commands = {
     'shell': [
         'docker.docker_shell'
     ],
+    'run': [
+        'docker.docker_run_cmd'
+    ],
     'start': [
         'docker.docker_up'
     ],
@@ -72,6 +75,9 @@ commands = {
         'docker.cleanup'
     ],
     'dump': [
-        'database.export_db'
+        'docker.docker_run("docker-console dump-in-docker")',
     ],
+    'dump-in-docker': [
+        'database.export_db',
+    ]
 }

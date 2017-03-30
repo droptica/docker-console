@@ -12,3 +12,5 @@ app_databases/*
 
 app_files/*
 !app_files/README.txt
+
+docker/custom_images/hashes.yml
