@@ -158,20 +158,19 @@ class BaseDocker(object):
                 dockerfile = open(DEV_DOCKER_IMAGE_DOCKERFILE_PATH + '/Dockerfile')
                 dockerfile_content = dockerfile.read()
 
-                # Pull images that custom images inherits from. If inherited image has changed, rebuild custom image.
-                images_found = re.findall('FROM (.+)', dockerfile_content)
-                images_ids = ''
-                for image in images_found:
-                    message('Pulling image %s that is used as base image in %s custom image.' % (image, DEV_DOCKER_IMAGE), 'info')
-                    run_cmd('docker pull %s' % image)
-                    image_id = self.get_image_id(image)
-                    if image_id:
-                        images_ids += image_id
+                # Pull image that custom images inherits from and get ID of that image.
+                base_image_match = re.search('FROM (.+)', dockerfile_content)
+                images_id = ''
+                if base_image_match is not None:
+                    base_image = base_image_match.group(1)
+                    message('Pulling image %s that is used as base image in %s custom image.' % (base_image, DEV_DOCKER_IMAGE), 'info')
+                    run_cmd('docker pull %s' % base_image)
+                    image_id = self.get_image_id(base_image)
 
-                # Create hash from base image id and dockerfile content and check if it has changed, if yes rebuild it.
+                # Create hash from base image ID and Dockerfile content and check if it has changed, if yes rebuild it.
                 # This also handles the situation when base image will be updated manually
                 # or from other project thanks to base image id checking.
-                dockerfile_hash = hashlib.md5(images_ids + dockerfile_content).hexdigest()
+                dockerfile_hash = hashlib.md5(image_id + dockerfile_content).hexdigest()
 
                 if not needs_rebuild and DEV_DOCKER_IMAGE not in hashes_content:
                     message('Hash for image %s not found in %s. '
