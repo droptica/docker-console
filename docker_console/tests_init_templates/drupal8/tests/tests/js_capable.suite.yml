@@ -1,0 +1,61 @@
+# Codeception Test Suite Configuration
+#
+# Suite for acceptance tests.
+# Perform tests in browser using the WebDriver or PhpBrowser.
+# If you need both WebDriver and PHPBrowser tests - create a separate suite.
+
+class_name: JSCapableTester
+modules:
+    enabled:
+        - Db:
+             dsn: 'mysql:host=mysql;dbname=db'
+             user: 'user'
+             password: 'pass'
+             dump: 'tests/_data/dump.sql'
+             populate: false
+             cleanup: false
+             reconnect: true
+        - WebDriver:
+             host: selenium
+             url: http://web
+             auth_user: 'user'
+             auth_pass: 'pass'
+             auth_timeout: 1200
+             browser: chrome
+             curl:
+                 CURLOPT_TIMEOUT: 1200
+        - \Helper\Acceptance
+        - \Helper\DrupalHelper
+        - \Codeception\Module\Drupal8\Drupal8:
+            root: '/app/app'
+            site_dir: 'default'
+            env: 'prod'
+            relative: no
+        - SuiteVariablesStorage
+        - DrupalContentTypeRegistryD8:
+            contentTypesAutoDump: true
+            contentTypesAutoDumpFile: "contentTypes.yml"
+            contentTypesFile: "contentTypes.yml"
+            customFieldsFile: "customFields.yml"
+            tests_root: '/app/tests'
+            contentTypesSubmitSelector: '#edit-actions .publish .form-submit'
+        - \Codeception\Module\Drupal8\ManageUsers:
+            defaultPass: "123"
+
+            roles_admin: &roles_admin
+              2: "authenticated user"
+              3: administrator
+
+#            custom_fields: &custom_fields
+#              field_test: 'test value'
+
+            users:
+              admin_user_js:
+                name: admin_user_js
+                email: admin_user_js@example.com
+                roles: *roles_admin
+#                custom_fields:
+#                  <<: *custom_fields
+
+            create: true                 # Whether to create all defined test users at the start of the suite.
+            delete: true                 # Whether to delete all defined test users at the end of the suite.
