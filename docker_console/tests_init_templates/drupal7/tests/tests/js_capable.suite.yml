@@ -19,6 +19,9 @@ modules:
              host: selenium
              url: http://web
              browser: chrome
+             auth_user: 'user'
+             auth_pass: 'pass'
+             auth_timeout: 1200
              curl:
                  CURLOPT_TIMEOUT: 1200
         - \Helper\Acceptance
