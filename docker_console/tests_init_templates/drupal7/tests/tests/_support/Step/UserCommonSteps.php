@@ -9,14 +9,15 @@ use Drupal\Pages\HomePage;
  * Class UserCommonSteps
  * @package Step
  */
-trait UserCommonSteps
-{
+trait UserCommonSteps {
 
   /**
    * Login user.
    *
    * @param string $username
+   *   Username.
    * @param string $password
+   *   Password.
    */
   public function login($username = 'admin', $password = '123')
   {

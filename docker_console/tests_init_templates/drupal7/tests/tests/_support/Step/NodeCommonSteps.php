@@ -7,17 +7,26 @@ use Drupal\Pages\NodePage;
 use Drupal\Pages\Page;
 use Codeception\Module\DrupalTestUser;
 
-trait NodeCommonSteps
-{
+/**
+ * Class NodeCommonSteps
+ * @package Step
+ */
+trait NodeCommonSteps {
 
   use UserCommonSteps;
 
   /**
+   * Create node as given test user.
+   *
    * @param $username
+   *   Given test username.
    * @param $content_type
+   *   Content type.
    * @param $fields_config
-   * @param bool $grab_nid
+   *   Field values.
+   *
    * @return int|null
+   *   Node ID or NULL.
    */
   public function createNewNodeAsUser($username, $content_type, $fields_config) {
     /** @var \AcceptanceTester $I */
@@ -45,7 +54,10 @@ trait NodeCommonSteps
   }
 
   /**
+   * Grab Node ID.
+   *
    * @return null
+   *   Node ID or NULL.
    */
   public function grabNodeNid() {
     /** @var \AcceptanceTester $I */
@@ -63,9 +75,15 @@ trait NodeCommonSteps
   }
 
   /**
+   * Delete node as test user.
+   *
    * @param $username
+   *   Test username.
    * @param $nid
-   * @return mixed
+   *   ID of node to delete.
+   *
+   * @return int
+   *   ID of deleted node.
    */
   public function deleteNodeAsUser($username, $nid) {
     /** @var \AcceptanceTester $I */
@@ -98,7 +116,7 @@ trait NodeCommonSteps
    * Node loads.
    *
    * @param $nid
-   * @return mixed
+   *   ID of node to check.
    */
   public function seeNodePage($nid) {
     /** @var \AcceptanceTester $I */
@@ -116,7 +134,7 @@ trait NodeCommonSteps
    * Node access denied.
    *
    * @param $nid
-   * @return mixed
+   *   ID of node to check.
    */
   public function cantSeeNodePage($nid) {
     if($nid) {
