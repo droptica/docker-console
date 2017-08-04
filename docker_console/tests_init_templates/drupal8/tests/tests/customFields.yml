@@ -1,0 +1,21 @@
+Global:
+  title:
+    machineName:    title
+    label:          Title
+    type:           string
+    widget:         string_textfield
+
+# Example for custom fields per content type
+#ContentTypes:
+#  accounting_standards:
+#    field_what_happened_affected_fro:
+#      additional_config:
+#        action: replace
+#        fields:
+#          field_what_happened_affected_fro_field_doc_whathappened:
+#            machineName:    field_what_happened_affected_fro_field_doc_whathappened
+#            label:          What Happened
+#            type:           Term reference
+#            widget:         Select list
+#            required:       false
+#            selector:       "#edit-field-what-happened-affected-fro-und-0-field-doc-whathappened-und"
