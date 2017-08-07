@@ -19,12 +19,12 @@ trait UserCommonSteps {
    * @param string $password
    *   Password.
    */
-  public function login($username = 'admin', $password = '123')
+  public function login($username = 'admin', $password = 'admin')
   {
     /** @var \AcceptanceTester $I */
     $I = $this;
     $I->amOnPage(UserLoginPage::route());
-    $url = $I->grabFromCurrentUrl();
+    $url = rtrim($I->grabFromCurrentUrl(), '/');
     $I->seeVar($url);
     if ($url != '/user/login') {
       $this->logout();
@@ -32,10 +32,11 @@ trait UserCommonSteps {
     }
     $I->fillField(UserLoginPage::$loginFormUsername, $username);
     $I->fillField(UserLoginPage::$loginFormPassword, $password);
-    $I->click('Log in');
+    $I->click(UserLoginPage::$loginFormSubmit);
+    $I->amOnPage(UserLoginPage::route());
     $I->seeCurrentUri();
-    $I->seeCurrentUrlEquals('/');
-    $I->see('Log out');
+    // If user is logged in correctly, he should be redirected from User Login page.
+    $I->dontSeeCurrentUrlMatches('/^(' . preg_quote(UserLoginPage::route(), '/') . ')/');
   }
 
   /**
@@ -45,8 +46,7 @@ trait UserCommonSteps {
   {
     /** @var \AcceptanceTester $I */
     $I = $this;
-    $I->amOnPage(HomePage::route());
-    $I->click('Log out');
+    $I->amOnPage('/user/logout');
     $I->see('Log in');
   }
 

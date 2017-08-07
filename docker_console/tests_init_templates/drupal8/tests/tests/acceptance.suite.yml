@@ -4,38 +4,38 @@
 # Perform tests in browser using the WebDriver or PhpBrowser.
 # If you need both WebDriver and PHPBrowser tests - create a separate suite.
 
-class_name: JSCapableTester
+class_name: AcceptanceTester
 modules:
     enabled:
         - Db:
-             dsn: 'mysql:host=mysql;dbname=db'
+             dsn: 'mysql:host=mysqlcom;dbname=db'
              user: 'user'
              password: 'pass'
              dump: 'tests/_data/dump.sql'
              populate: false
              cleanup: false
              reconnect: true
-        - WebDriver:
-             host: selenium
+        - PhpBrowser:
              url: http://web
-             browser: chrome
-             auth_user: 'user'
-             auth_pass: 'pass'
-             auth_timeout: 1200
+             auth: ['user', 'pass']
              curl:
                  CURLOPT_TIMEOUT: 1200
         - \Helper\Acceptance
         - \Helper\DrupalHelper
-        - \Codeception\Module\Drupal7\Drupal7:
+        - \Codeception\Module\Drupal8\Drupal8:
             root: '/app/app'
+            site_dir: 'default'
+            env: 'prod'
             relative: no
         - SuiteVariablesStorage
-        - DrupalContentTypeRegistry:
+        - DrupalContentTypeRegistryD8:
             contentTypesAutoDump: true
             contentTypesAutoDumpFile: "contentTypes.yml"
             contentTypesFile: "contentTypes.yml"
-            customFieldsFile: "contentTypesOverrides.yml"
-        - ManageUsers:
+            customFieldsFile: "customFields.yml"
+            tests_root: '/app/tests'
+            contentTypesSubmitSelector: '#edit-actions .publish .form-submit'
+        - \Codeception\Module\Drupal8\ManageUsers:
             defaultPass: "123"
 
             roles_admin: &roles_admin
@@ -43,16 +43,13 @@ modules:
               3: administrator
 
 #            custom_fields: &custom_fields
-#              field_first_name: 'Fname'
-#              field_last_name: 'Lname'
-#              field_mobile: '123456789'
+#              field_test: 'test value'
 
             users:
-              admin_user:
-                name: admin_user
-                email: admin_user@example.com
+              admin_user_acceptance:
+                name: admin_user_acceptance
+                email: admin_user_acceptance@example.com
                 roles: *roles_admin
-                custom_fields: []
 #                custom_fields:
 #                  <<: *custom_fields
 

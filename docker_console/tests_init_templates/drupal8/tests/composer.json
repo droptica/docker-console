@@ -25,7 +25,7 @@
     "droptica/codeception-drupal-storage": "dev-master",
     "droptica/codeception-drupal-content-types": "dev-develop",
     "ixis/codeception-drupal-mail": "dev-develop",
-    "phpunit/phpunit": "~5",
+    "phpunit/phpunit": "~6",
     "guzzle/guzzle": "~3.7"
   }
 }

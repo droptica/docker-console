@@ -16,10 +16,10 @@ trait NodeCommonSteps {
   use UserCommonSteps;
 
   /**
-   * Create node as given test user.
+   * Create node as test user.
    *
    * @param $username
-   *   Given test username.
+   *   Test username.
    * @param $content_type
    *   Content type.
    * @param $fields_config
@@ -42,8 +42,10 @@ trait NodeCommonSteps {
     $U->login($user->name, $user->pass);
 
     // create node
-    $I->createNode($I, $content_type, $fields_config, NULL, FALSE);
-    $nid = $this->grabNodeNid();
+    $nid = $I->createNode($I, $content_type, $fields_config, NULL, TRUE);
+    if (empty($nid)) {
+      $nid = $this->grabNodeNid();
+    }
     $I->appendNodeToStorage($nid);
     $I->seeVar($nid);
 
@@ -64,13 +66,12 @@ trait NodeCommonSteps {
     $I = $this;
 
     // Grab the node id from the Edit tab once the node has been saved.
-    $edit_url = $I->grabAttributeFrom('ul.tabs--primary > li:nth-child(2) > a', 'href');
+    $edit_url = $I->grabAttributeFrom('ul.tabs.primary > li:nth-child(2) > a', 'href');
     $matches = array();
 
     if (preg_match('~/node/(\d+)/edit~', $edit_url, $matches)) {
       return $matches[1];
     }
-
     return null;
   }
 
@@ -121,9 +122,7 @@ trait NodeCommonSteps {
   public function seeNodePage($nid) {
     /** @var \AcceptanceTester $I */
     $I = $this;
-    $node = node_load($nid);
     $I->amOnPage(NodePage::route($nid));
-    $I->see($node->title, Page::$pageTitle);
     $I->seeElement(NodePage::$footerRegion);
     $I->dontSee('Page not found', Page::$pageTitle);
     $I->dontSee('Access denied', Page::$pageTitle);
@@ -143,35 +142,5 @@ trait NodeCommonSteps {
       $I->amOnPage(NodePage::route($nid));
       $I->see(AccessDenied::$accessDeniedMessage, Page::$pageTitle);
     }
-  }
-
-  /**
-   * Grab published node of type.
-   *
-   * @param $type
-   * @return null
-   */
-  public function grabNodeOfType($type) {
-    $query = db_select('node', 'n');
-    $query->fields('n', array('nid'));
-    $query->condition('n.type', $type, '=');
-    $query->condition('n.status', 1, '=');
-    $query->orderBy('n.nid', 'asc');
-    $query->range(NULL, 1);
-    $result = $query->execute()->fetchCol();
-    return (count($result) > 0 ? $result[0] : NULL);
-  }
-
-  /**
-   * Count published nodes of type.
-   *
-   * @param $type
-   */
-  public function countNodes($type) {
-    $query = db_select('node', 'n');
-    $query->fields('n', array('nid'));
-    $query->condition('n.type', $type, '=');
-    $query->condition('n.status', 1, '=');
-    return $query->execute()->rowCount();
   }
 }
