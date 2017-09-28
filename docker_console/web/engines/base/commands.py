@@ -52,8 +52,17 @@ commands = {
     'codecept': [
         'tests.codecept_run'
     ],
-    'test' : [
+    'robo': [
+        'tests.robo_run'
+    ],
+    'init-robo': [
+        'tests.robo_init'
+    ],
+    'test': [
         'tests.tests_run'
+    ],
+    'test-parallel': [
+        'tests.test_run_parallel'
     ],
 
     'config-prepare': [

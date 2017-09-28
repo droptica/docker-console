@@ -4,6 +4,13 @@ import uuid
 import shutil
 import tarfile
 
+def copy_file(src, dst, force):
+    if not os.path.exists(dst) or force:
+        shutil.copyfile(
+            src,
+            dst
+        )
+
 def create_dir_copy(path, dest_path=None, force_update=False):
     if dest_path is None:
         temp_dir = tempfile.gettempdir()
