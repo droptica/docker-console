@@ -283,6 +283,29 @@ Note that **docker-console** can be also run by **dcon**. This commands are equi
 
 |
 
+- test-parallel:
+    This command runs test in parallel mode. Tests are splitted into groups.
+    Split is done either by files or by single tests. Then,each of generated group is executed in separate container.
+    After all, tests results are merged into single reports files (HTML and XML).
+
+    |
+
+    Options:
+
+    \--groups
+        Number of groups that tests should be splitted into.
+
+    |
+
+    \--group-by
+        Type of tests split, can be either **files** or **tests**.
+
+    |
+
+    \--suites
+        With this param, executed tests can be narrowed to single suite. Without this tests from all suites are executed.
+|
+
 - config-prepare:
     This command copies the docker-compose-template.yml to docker-compose.yml with replaced variables from .env file.
 

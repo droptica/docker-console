@@ -39,6 +39,12 @@ modules:
             customFieldsFile: "customFields.yml"
             tests_root: '/app/tests'
             contentTypesSubmitSelector: '#edit-actions .publish .form-submit'
+            message_info_selector: '.messages.messages--status'
+            message_warning_selector: '.messages.messages--warning'
+            message_error_selector: '.messages.messages--error'
+            node_edit_link_selector: 'ul.tabs.primary > li:nth-child(2) > a'
+            node_create_message: '%s %s has been created.' # Variables will be replaced with Content type name, node title
+            node_delete_message: 'has been deleted.'
         - \Codeception\Module\Drupal8\ManageUsers:
             defaultPass: "123"
 

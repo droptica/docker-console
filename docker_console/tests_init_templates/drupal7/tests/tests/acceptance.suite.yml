@@ -31,6 +31,13 @@ modules:
             contentTypesAutoDumpFile: "contentTypes.yml"
             contentTypesFile: "contentTypes.yml"
             customFieldsFile: "contentTypesOverrides.yml"
+            contentTypesSubmitSelector: '#edit-submit'
+            message_info_selector: '.messages.status'
+            message_warning_selector: '.messages.warning'
+            message_error_selector: '.messages.error'
+            node_edit_link_selector: "//ul[contains(@class,'tabs')]/li[2]/a"
+            node_create_message: '%s %s has been created.' # Variables will be replaced with Content type name, node title
+            node_delete_message: 'has been deleted.'
         - ManageUsers:
             defaultPass: "123"
 
