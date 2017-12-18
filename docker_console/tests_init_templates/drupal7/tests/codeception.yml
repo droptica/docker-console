@@ -23,3 +23,5 @@ modules:
             populate: false
             cleanup: false
             reconnect: true
+groups:
+    parallel_group_*: tests/_output/parallel_group_*

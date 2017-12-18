@@ -99,4 +99,5 @@ class DrupalHelper extends \Codeception\Module {
         $webdriver->get($url);
       });
     }
+  }
 }
