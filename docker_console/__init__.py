@@ -18,6 +18,9 @@ args = ["-p", "--docker-run-path",
         "--tpl",
         "--db",
         "--site",
+        "--groups",
+        "--suites",
+        "--group-by",
         "-y"]
 
 for i, arg in enumerate(sys.argv):
@@ -51,6 +54,15 @@ parser.add_option("--tpl", dest="init_template",
 parser.add_option("--db", dest="app_database",
               help="select DB to work with", metavar="APP_DATABASE")
 
+parser.add_option("--groups", dest="parallel_test_groups",
+              help="Number of parallel test groups", metavar="PARALLEL_TEST_GROUPS")
+
+parser.add_option("--suites", dest="parallel_test_suites",
+              help="Test suites to run", metavar="PARALLEL_TEST_SUITES")
+
+parser.add_option("--group-by", dest="parallel_group_by",
+              help="Group tests by files or single tests", metavar="PARALLEL_GROUP_BY")
+
 #TODO: this options should be in drupal7 engine but engine is loaded later in __main__
 parser.add_option("-e", "--drush-eval-run-code", dest="docker_drush_eval_run_code",
               help="Use with action 'drush'. "
@@ -65,6 +77,9 @@ parser.set_defaults(docker_init_replace_conf=False)
 parser.set_defaults(docker_yes_all=False)
 parser.set_defaults(app_database='default')
 parser.set_defaults(drupal_site='default')
+parser.set_defaults(parallel_test_groups=5)
+parser.set_defaults(parallel_test_suites='')
+parser.set_defaults(parallel_group_by='files')
 
 group = OptionGroup(parser, "Available aliases", ", ".join('@%s' % alias for alias in available_aliases[:]))
 parser.add_option_group(group)
