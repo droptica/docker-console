@@ -304,6 +304,7 @@ Note that **docker-console** can be also run by **dcon**. This commands are equi
 
     \--suites
         With this param, executed tests can be narrowed to single suite. Without this tests from all suites are executed.
+
 |
 
 - config-prepare:
