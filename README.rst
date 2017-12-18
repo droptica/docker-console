@@ -285,7 +285,7 @@ Note that **docker-console** can be also run by **dcon**. This commands are equi
 
 - test-parallel:
     This command runs test in parallel mode. Tests are splitted into groups.
-    Split is done either by files or by single tests. Then,each of generated group is executed in separate container.
+    Split is done either by files or by single tests. Then, each of generated group is executed in separate docker container.
     After all, tests results are merged into single reports files (HTML and XML).
 
     |

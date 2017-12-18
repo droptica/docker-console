@@ -89,6 +89,7 @@ class BaseTests(object):
                    self.config.TESTS['IMAGES']['codecept_image'][0], cmd))
 
     def test_run_parallel(self):
+        self.robo_init()
         split_type = cmd_options.parallel_group_by
         number_of_groups = int(cmd_options.parallel_test_groups)
         suites = cmd_options.parallel_test_suites.split(',')
@@ -105,7 +106,7 @@ class BaseTests(object):
                 suite_number = idx + 1
                 command_container_id = self.docker_codecept(
                     'run tests/%s --html report_parallel_%s.html --xml report_parallel_%s.xml' % (suite, suite_number, suite_number), parallel=True)
-                command_containers_ids[command_container_id] = {'finished': False}
+                command_containers_ids[command_container_id] = {'finished': False, 'suite': suite}
         # Run parallel testing of groups.
         else:
             self.docker_robo('parallel:split-by-%s %s' % (split_type, number_of_groups))
@@ -115,7 +116,7 @@ class BaseTests(object):
                     command_container_id = self.docker_codecept(
                         'run --group parallel_group_%s --html report_parallel_%s.html --xml report_parallel_%s.xml -vvv' % (group, group, group),
                         parallel=True)
-                    command_containers_ids[command_container_id] = {'finished': False}
+                    command_containers_ids[command_container_id] = {'finished': False, 'group': 'parallel_group_%s' % group}
         if len(command_containers_ids) > 0:
             number_of_groups = len(command_containers_ids)
             message('%s containers with parallel test groups has been started. '
@@ -151,14 +152,20 @@ class BaseTests(object):
             time.sleep(10)
             parallel_tests_finished = True
             for container_id in command_containers_ids:
+                container_tests_info = ''
+                for info_name in ['group', 'suite']:
+                    if info_name in command_containers_ids[container_id]:
+                        container_tests_info = '(%s: %s)' % (info_name, command_containers_ids[container_id][info_name])
+                        break
+
                 test_running = run_cmd('docker ps -q -f id=%s' % container_id, return_output=True)
                 if command_containers_ids[container_id]['finished']:
-                    print "Container %s finished" % container_id
+                    print "Container %s finished %s" % (container_id, container_tests_info)
                 elif not test_running:
                     command_containers_ids[container_id]['finished'] = True
-                    print "Container %s finished right now" % container_id
+                    print "Container %s finished right now %s" % (container_id, container_tests_info)
                 else:
-                    print "Container %s still running" % container_id
+                    print "Container %s still running %s" % (container_id, container_tests_info)
                     parallel_tests_finished = False
 
             if parallel_tests_finished:
