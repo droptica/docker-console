@@ -70,8 +70,7 @@ def build_array(key):
     if key in commands:
         return commands[key]
     else:
-        message('Invalid parametr: "%s"' % key)
-        return []
+        raise Exception('Invalid parameter: "%s"' % key)
 
 
 def main():
