@@ -225,11 +225,17 @@ class BaseDocker(object):
 
     def docker_command(self):
         if self.config.NO_INTERACTIVE:
-            return 'docker run --rm %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
+            return 'docker run --rm %s %s %s %s %s' % (self.get_env_file(), self._get_volumes(), self._get_links(), self._get_hosts(),
                                                         self.config.DEV_DOCKER_IMAGES['default'][0])
         else:
-            return 'docker run --rm -it %s %s %s %s' % (self._get_volumes(), self._get_links(), self._get_hosts(),
+            return 'docker run --rm -it %s %s %s %s %s' % (self.get_env_file(), self._get_volumes(), self._get_links(), self._get_hosts(),
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
+
+    def get_env_file(self):
+        if not os.path.isfile(os.path.join(self.config.BUILD_PATH, '.env')):
+            return ''
+        else:
+            return '--env-file=.env'
 
     def get_container_ip(self):
         web_container_alias = self._container_alias("web:web").split(':')[0]
