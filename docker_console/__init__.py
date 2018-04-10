@@ -72,8 +72,8 @@ parser.add_option("-e", "--drush-eval-run-code", dest="docker_drush_eval_run_cod
 parser.add_option("--site", dest="drupal_site",
               help="select Drupal site to work with", metavar="DRUPAL_SITE")
 
-parser.add_option("--with-env", dest="with_env",
-              help="Use .env file with dcon commands", metavar="WITH_ENV")
+parser.add_option("--with-env", action="store_true", dest="with_env",
+              help="Use .env file with dcon commands")
 
 
 parser.set_defaults(docker_shell_run=False)
