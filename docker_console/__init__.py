@@ -21,6 +21,7 @@ args = ["-p", "--docker-run-path",
         "--groups",
         "--suites",
         "--group-by",
+        "--with-env",
         "-y"]
 
 for i, arg in enumerate(sys.argv):
@@ -71,6 +72,9 @@ parser.add_option("-e", "--drush-eval-run-code", dest="docker_drush_eval_run_cod
 parser.add_option("--site", dest="drupal_site",
               help="select Drupal site to work with", metavar="DRUPAL_SITE")
 
+parser.add_option("--with-env", dest="with_env",
+              help="Use .env file with dcon commands", metavar="WITH_ENV")
+
 
 parser.set_defaults(docker_shell_run=False)
 parser.set_defaults(docker_init_replace_conf=False)
@@ -80,6 +84,7 @@ parser.set_defaults(drupal_site='default')
 parser.set_defaults(parallel_test_groups=5)
 parser.set_defaults(parallel_test_suites='')
 parser.set_defaults(parallel_group_by='files')
+parser.set_defaults(with_env=False)
 
 group = OptionGroup(parser, "Available aliases", ", ".join('@%s' % alias for alias in available_aliases[:]))
 parser.add_option_group(group)

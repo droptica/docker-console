@@ -232,6 +232,9 @@ class BaseDocker(object):
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
 
     def get_env_file(self):
+        if not cmd_options.with_env:
+            return ''
+
         if not os.path.isfile(os.path.join(self.config.BUILD_PATH, '.env')):
             return ''
         else:
