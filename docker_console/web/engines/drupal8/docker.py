@@ -30,7 +30,8 @@ class Docker(BaseDocker):
 
     def drush_run(self):
         if cmd_options.docker_drush_eval_run_code is None:
-            cmd = ' '.join(self.config.args[2:])
+            # Use parameters starting only from 'drush' command position
+            cmd = ' '.join(self.config.args[self.config.args.index('drush')+1:])
         else:
             cmd = "ev '%s'" % cmd_options.docker_drush_eval_run_code
             if cmd_options.docker_yes_all:
