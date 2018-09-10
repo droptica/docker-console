@@ -22,6 +22,7 @@ args = ["-p", "--docker-run-path",
         "--suites",
         "--group-by",
         "--with-env",
+        "--with-aws-mounts",
         "-y"]
 
 for i, arg in enumerate(sys.argv):
@@ -75,6 +76,9 @@ parser.add_option("--site", dest="drupal_site",
 parser.add_option("--with-env", action="store_true", dest="with_env",
               help="Use .env file with dcon commands")
 
+parser.add_option("--with-aws-mounts", action="store_true", dest="with_aws_mounts",
+              help="Attach AWS volumes to container")
+
 
 parser.set_defaults(docker_shell_run=False)
 parser.set_defaults(docker_init_replace_conf=False)
@@ -85,6 +89,7 @@ parser.set_defaults(parallel_test_groups=5)
 parser.set_defaults(parallel_test_suites='')
 parser.set_defaults(parallel_group_by='files')
 parser.set_defaults(with_env=False)
+parser.set_defaults(with_aws_mounts=False)
 
 group = OptionGroup(parser, "Available aliases", ", ".join('@%s' % alias for alias in available_aliases[:]))
 parser.add_option_group(group)

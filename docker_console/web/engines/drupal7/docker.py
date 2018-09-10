@@ -25,6 +25,10 @@ class Docker(BaseDocker):
             volumes.append('-v %s:%s' % (real_private_files_path,
                                          private_files_path.replace(self.config.BUILD_PATH, '/app/')))
 
+        # AWS mounts are required for example for cron run
+        if cmd_options.with_aws_mounts:
+            volumes.append('-v /opt/files:/opt/files')
+
         volumes.append('-v %s:%s' % (self.config.BUILD_PATH, '/app'))
         return ' '.join(volumes)
 
