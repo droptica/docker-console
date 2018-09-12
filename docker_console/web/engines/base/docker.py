@@ -99,10 +99,6 @@ class BaseDocker(object):
         volumes = []
         volumes.append('-v %s:%s' % (self.config.BUILD_PATH, '/app'))
 
-        # AWS mounts are required for example for cron run
-        if cmd_options.with_aws_mounts:
-            volumes.append('-v /opt/files:/opt/files')
-
         return ' '.join(volumes)
 
     def _container_alias(self, value):
