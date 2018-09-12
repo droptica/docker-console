@@ -79,7 +79,6 @@ parser.add_option("--with-env", action="store_true", dest="with_env",
 parser.add_option("--with-aws-mounts", action="store_true", dest="with_aws_mounts",
               help="Attach AWS volumes to container")
 
-
 parser.set_defaults(docker_shell_run=False)
 parser.set_defaults(docker_init_replace_conf=False)
 parser.set_defaults(docker_yes_all=False)

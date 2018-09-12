@@ -98,7 +98,6 @@ class BaseDocker(object):
     def _get_volumes(self):
         volumes = []
         volumes.append('-v %s:%s' % (self.config.BUILD_PATH, '/app'))
-
         return ' '.join(volumes)
 
     def _container_alias(self, value):
