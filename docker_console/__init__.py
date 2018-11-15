@@ -78,7 +78,7 @@ parser.add_option("--with-env", action="store_true", dest="with_env",
               help="Use .env file with dcon commands")
 
 parser.add_option("--with-net", dest="with_net",
-              help="Use nginx-proxy network")
+              help="Use provided docker network")
 
 parser.add_option("--with-aws-mounts", action="store_true", dest="with_aws_mounts",
               help="Attach AWS volumes to container")
