@@ -77,7 +77,7 @@ parser.add_option("--site", dest="drupal_site",
 parser.add_option("--with-env", action="store_true", dest="with_env",
               help="Use .env file with dcon commands")
 
-parser.add_option("--with-net", action="store_true", dest="with_net",
+parser.add_option("--with-net", dest="with_net",
               help="Use nginx-proxy network")
 
 parser.add_option("--with-aws-mounts", action="store_true", dest="with_aws_mounts",
@@ -92,7 +92,7 @@ parser.set_defaults(parallel_test_groups=5)
 parser.set_defaults(parallel_test_suites='')
 parser.set_defaults(parallel_group_by='files')
 parser.set_defaults(with_env=False)
-parser.set_defaults(with_net=False)
+parser.set_defaults(with_net='')
 parser.set_defaults(with_aws_mounts=False)
 
 group = OptionGroup(parser, "Available aliases", ", ".join('@%s' % alias for alias in available_aliases[:]))

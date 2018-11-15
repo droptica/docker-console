@@ -241,10 +241,7 @@ class BaseDocker(object):
             return '--env-file=.env'
 
     def get_net(self):
-        if not cmd_options.with_net:
-            return ''
-        else:
-            return '--network nginx-proxy'
+        return '--network %s' % cmd_options.with_net if cmd_options.with_net else ''
 
     def get_container_ip(self):
         web_container_alias = self._container_alias("web:web").split(':')[0]
