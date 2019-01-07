@@ -31,7 +31,7 @@ class BaseTests(object):
             selenium_container_removed = True
 
         if not selenium_container_id or selenium_container_removed:
-            run_cmd('docker run -d --name selenium-test-%s %s %s %s %s'
+            run_cmd('docker run -d -v /dev/shm:/dev/shm --name selenium-test-%s %s %s %s %s'
                     % (self.docker.base_alias, self.docker.get_env_file(),
                        self.docker._get_links(), self.docker._get_hosts(),
                        self.config.TESTS['IMAGES']['selenium_image'][0]))
