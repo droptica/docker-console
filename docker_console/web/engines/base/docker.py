@@ -79,6 +79,18 @@ class BaseDocker(object):
                         links.append(key)
         return ' '.join(['--link ' + self._container_alias(x) for x in links])
 
+    def _get_extra_hosts(self):
+        docker_compose = open(self.compose_path)
+        docker_config = yaml.load(docker_compose)
+        links = []
+        for container in docker_config:
+            if 'extra_hosts' in docker_config[container]:
+                for key in docker_config[container]['extra_hosts']:
+                    if key not in links:
+                        links.append(key)
+        output = ' '.join(['--add-host ' + x for x in links])
+        return output.replace('${', '{').format(**os.environ)
+
     def _get_hosts(self):
         docker_comose = open(self.compose_path)
         docker_config = yaml.load(docker_comose)
@@ -225,10 +237,10 @@ class BaseDocker(object):
 
     def docker_command(self):
         if self.config.NO_INTERACTIVE:
-            return 'docker run --rm %s %s %s %s %s %s' % (self.get_net(), self.get_env_file(), self._get_volumes(), self._get_links(), self._get_hosts(),
+            return 'docker run --rm %s %s %s %s %s %s %s' % (self.get_net(), self.get_env_file(), self._get_extra_hosts(), self._get_volumes(), self._get_links(), self._get_hosts(),
                                                         self.config.DEV_DOCKER_IMAGES['default'][0])
         else:
-            return 'docker run --rm -it %s %s %s %s %s %s' % (self.get_net(), self.get_env_file(), self._get_volumes(), self._get_links(), self._get_hosts(),
+            return 'docker run --rm -it %s %s %s %s %s %s %s' % (self.get_net(), self.get_env_file(), self._get_extra_hosts(),  self._get_volumes(), self._get_links(), self._get_hosts(),
                                         self.config.DEV_DOCKER_IMAGES['default'][0])
 
     def get_env_file(self):
