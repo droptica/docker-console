@@ -31,25 +31,25 @@ class BaseTests(object):
             selenium_container_removed = True
 
         if not selenium_container_id or selenium_container_removed:
-            run_cmd('docker run -d -v /dev/shm:/dev/shm --name selenium-test-%s %s %s %s %s'
+            run_cmd('docker run -d -v /dev/shm:/dev/shm --name selenium-test-%s %s %s %s %s %s'
                     % (self.docker.base_alias, self.docker.get_env_file(),
-                       self.docker._get_links(), self.docker._get_hosts(),
+                       self.docker._get_extra_hosts(), self.docker._get_links(), self.docker._get_hosts(),
                        self.config.TESTS['IMAGES']['selenium_image'][0]))
             print "Waiting 5 sec."
             time.sleep(5)
 
         if parallel:
-            command_container_id = run_cmd('docker run -d %s %s %s %s %s -w %s %s codecept %s'
-                                           % (self.docker.get_env_file(), self.docker._get_volumes(),
-                                              self.docker._get_links(), self.docker._get_hosts(),
+            command_container_id = run_cmd('docker run -d %s %s %s %s %s %s -w %s %s codecept %s'
+                                           % (self.docker.get_env_file(), self.docker._get_extra_hosts(),
+                                              self.docker._get_volumes(), self.docker._get_links(), self.docker._get_hosts(),
                                               link_selenium_name, os.path.join('/app', self.config.TESTS['LOCATION']),
                                               self.config.TESTS['IMAGES']['codecept_image'][0], cmd),
                                            return_output=True)
 
             return command_container_id
         else:
-            run_cmd('docker run --rm %s %s %s %s %s -w %s %s codecept %s'
-                    % (self.docker.get_env_file(), self.docker._get_volumes(), self.docker._get_links(), self.docker._get_hosts(),
+            run_cmd('docker run --rm %s %s %s %s %s %s -w %s %s codecept %s'
+                    % (self.docker.get_env_file(), self.docker._get_volumes(), self.docker._get_extra_hosts(), self.docker._get_links(), self.docker._get_hosts(),
                        link_selenium_name, os.path.join('/app', self.config.TESTS['LOCATION']),
                        self.config.TESTS['IMAGES']['codecept_image'][0], cmd))
 
@@ -84,8 +84,8 @@ class BaseTests(object):
                   force_replace)
 
     def docker_robo(self, cmd):
-        run_cmd('docker run --rm %s %s %s -w %s %s robo %s'
-                % (self.docker._get_volumes(), self.docker._get_links(), self.docker._get_hosts(),
+        run_cmd('docker run --rm %s %s %s %s -w %s %s robo %s'
+                % (self.docker._get_extra_hosts(), self.docker._get_volumes(), self.docker._get_links(), self.docker._get_hosts(),
                    os.path.join('/app', self.config.TESTS['LOCATION']),
                    self.config.TESTS['IMAGES']['codecept_image'][0], cmd))
 
