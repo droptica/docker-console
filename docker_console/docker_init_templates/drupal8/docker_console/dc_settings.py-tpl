@@ -43,7 +43,7 @@ ENV = None
 ####################
 
 DEV_DOCKER_IMAGES = {
-    'default': ('droptica/drupal-dev', None),
+    'default': ('droptica/php-dev:7.2', None),
     'additional_images': [
 #     ('vendor/image_name', None), # image from dockerhub
 #     ('vendor/image_name', 'path_to_dockerfile') # custom image from Dockerfile

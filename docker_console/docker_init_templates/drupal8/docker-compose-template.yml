@@ -1,5 +1,5 @@
 web:
-  image: droptica/drupal-apache
+  image: droptica/php-apache:7.2
   volumes:
     - ./app:/var/www/html
   links:
@@ -18,8 +18,9 @@ mysql:
     MYSQL_PASSWORD: pass
 
 phpmyadmin:
-  image: nazarpc/phpmyadmin
+  image: phpmyadmin/phpmyadmin:latest
   links:
     - mysql:mysql
   environment:
       VIRTUAL_HOST: phpmyadmin.{{HOST}}
+      PMA_HOST: mysql

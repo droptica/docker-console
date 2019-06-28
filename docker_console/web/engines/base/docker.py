@@ -33,7 +33,7 @@ class BaseDocker(object):
 
     def get_project_name(self, working_dir, project_name=None):
         def normalize_name(name):
-            return re.sub(r'[^a-z0-9]', '', name.lower())
+            return re.sub(r'[^a-z0-9\-_]', '', name.lower())
 
         project_name = project_name or os.environ.get('COMPOSE_PROJECT_NAME')
         if project_name:
@@ -341,7 +341,7 @@ class BaseDocker(object):
         content = config_file.read()
         config_file.close()
         context = {
-            '{{HOST}}': self.base_alias + '.dev'
+            '{{HOST}}': re.sub(r'[^a-z0-9\-]', '', self.base_alias) + '.localhost'
         }
         for key in context:
             value = context[key]
@@ -418,10 +418,6 @@ class BaseDocker(object):
 
     def add_entry_to_etc_hosts(self):
         try:
-            nginx_proxy_ip = self.get_nginx_proxy_ip()
-            if not nginx_proxy_ip:
-                raise Exception
-
             with open('/etc/hosts', 'rt') as f:
                 host_names = self.docker_get_compose_option_value('web', 'VIRTUAL_HOST', 'environment').replace(',', ' ')
                 phpmyadmin_host = self.docker_get_compose_option_value('phpmyadmin', 'VIRTUAL_HOST', 'environment').replace(',', ' ')
@@ -429,7 +425,7 @@ class BaseDocker(object):
                     host_names += ' ' + phpmyadmin_host
                 s = f.read()
                 if not host_names in s:
-                    s += "\n%s\t\t%s\n" % (nginx_proxy_ip, host_names)
+                    s += "\n%s\t\t%s\n" % ('127.0.0.1', host_names)
                     with open('/tmp/etc_hosts.tmp', 'wt') as outf:
                         outf.write(s)
 
@@ -449,13 +445,13 @@ class BaseDocker(object):
         host = self.config.args[3]
         self.docker_add_host(container, host)
 
-    def setfacl(self):
+    def setfacl(self, group='www-data'):
         if os.getuid():
-            self.docker_run('setfacl -Rm g:www-data:rwX %s' % self.config.WEB['APP_LOCATION'])
-            self.docker_run('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB['APP_LOCATION'])
+            self.docker_run('setfacl -Rm g:%s:rwX %s' % (group, self.config.WEB['APP_LOCATION']))
+            self.docker_run('setfacl -d -Rm g:%s:rwX %s' % (group, self.config.WEB['APP_LOCATION']))
         else:
-            run_cmd('setfacl -Rm g:www-data:rwX %s' % self.config.WEB['APP_LOCATION'])
-            run_cmd('setfacl -d -Rm g:www-data:rwX  %s' % self.config.WEB['APP_LOCATION'])
+            run_cmd('setfacl -Rm g:%s:rwX %s' % (group, self.config.WEB['APP_LOCATION']))
+            run_cmd('setfacl -d -Rm g:%s:rwX %s' % (group, self.config.WEB['APP_LOCATION']))
 
     def cleanup(self):
         if run_cmd('docker ps -a -q -f status=exited', return_output=True):

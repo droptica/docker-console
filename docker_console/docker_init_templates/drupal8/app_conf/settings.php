@@ -13,7 +13,7 @@ $databases['default']['default'] = array (
 );
 
 // You have to generate good salt and sync
-$settings['hash_salt'] = '';
+$settings['hash_salt'] = 'Rlou8BJ-3YZXc3r9Yihh2HLzAJR_ltWWfXlt8hzyW4r9RhkK40c7BD7wirudoyw76kbvAMHrGg';
 
 
 $config_directories = array();

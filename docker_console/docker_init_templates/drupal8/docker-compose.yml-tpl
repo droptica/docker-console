@@ -1,12 +1,12 @@
 web:
-  image: droptica/drupal-apache:xdebug
+  image: droptica/php-apache:7.2
   volumes:
     - ./app:/var/www/html
-#    - ./docker/custom_config/php.ini:/usr/local/etc/php/conf.d/php.ini:ro # enable xdebug
   links:
     - mysql:mysql
   environment:
     VIRTUAL_HOST: {{HOST}},www.{{HOST}}
+    XDEBUG_ENABLE: 1
 
 mysql:
   image: mysql:5.6
@@ -20,8 +20,9 @@ mysql:
     MYSQL_PASSWORD: pass
 
 phpmyadmin:
-  image: nazarpc/phpmyadmin
+  image: phpmyadmin/phpmyadmin:latest
   links:
     - mysql:mysql
   environment:
       VIRTUAL_HOST: phpmyadmin.{{HOST}}
+      PMA_HOST: mysql

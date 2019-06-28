@@ -32,4 +32,16 @@
 #         'confirm_action("no")',
 #         'drush.uli'
 #     ],
+#     # When files should be unpacked during build, whole 'build-in-docker' command needs to be overridden and
+#     # step 'archive.unpack_files' needs to be added to the list of steps, like below:
+#     'build-in-docker': [
+#         'archive.unpack_files(True)', # True when existing files should be overridden with new ones, default is False.
+#         'drupal_settings.copy_settings("drupal7")',
+#         'database.drop_db',
+#         'database.create_db',
+#         'database.import_db',
+#         'drush.cc_all', # or 'drush.run("cc all")',
+#         'drush.change_password',
+#         'drush.uli' # or 'drush.run("uli")'
+#     ],
 # }
