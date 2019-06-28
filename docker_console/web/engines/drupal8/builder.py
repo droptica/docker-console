@@ -26,6 +26,11 @@ class Builder(BaseBuilder):
             self.drupal_settings = DrupalSettings(self.config)
             self.archive = Archive(self.config)
 
+    def chown_default_settings(self):
+        default_settings = os.path.join(self.config.WEB['APP_LOCATION'], 'sites',
+                                        self.config.DRUPAL['default']['SITE_DIRECTORY'], 'default.settings.php')
+        self.docker.docker_chown(default_settings, '7000')
+
     def chmod_files(self):
         for site in self.config.DRUPAL:
             run_cmd('chmod -Rf 777 %s' % os.path.join(self.config.WEB['APP_ROOT'],

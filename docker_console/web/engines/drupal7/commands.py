@@ -23,11 +23,18 @@ drupal_commands = {
         'database.drop_db',
         'database.create_db',
         'database.import_db',
-        'drush.run("cc all")',
-        'drush.run("uli")'
+        'drush.cc_all',
+        'drush.change_password',
+        'drush.uli'
     ],
     'drush': [
         'docker.drush_run'
+    ],
+    'set-permissions': [
+        'docker.chown',
+        'docker.setfacl("7000")',
+        'chown_default_settings',
+        'chmod_files'
     ],
 }
 

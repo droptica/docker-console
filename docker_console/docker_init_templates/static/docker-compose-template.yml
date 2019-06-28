@@ -1,5 +1,5 @@
 web:
-  image: droptica/drupal-apache
+  image: droptica/php-apache:7.2
   volumes:
     - ./app:/var/www/html
   environment:
