@@ -131,10 +131,16 @@ class BaseTests(object):
         else:
             suites = []
             suites_config = {}
+            groups = []
+            groups_config = {}
             split_tests_command = 'parallel:split-by-%s %s' % (split_type, number_of_groups)
             if 'PARALLEL' in self.config.TESTS and 'SUITES' in self.config.TESTS['PARALLEL']:
                 suites_config = self.config.TESTS['PARALLEL']['SUITES']
                 suites = suites_config.keys()
+            if 'PARALLEL' in self.config.TESTS and 'GROUPS' in self.config.TESTS['PARALLEL']:
+                groups_config = self.config.TESTS['PARALLEL']['GROUPS']
+                groups = groups_config.keys()
+
             if len(suites) > 0:
                 split_tests_command += ' %s' % ','.join(suites)
                 self.docker_robo(split_tests_command)
@@ -172,6 +178,43 @@ class BaseTests(object):
                         command_container_id = self.docker_codecept(codecept_command, parallel=True, group_name=group_name_full, browser=browser)
                         command_containers_ids[command_container_id] = {'finished': False,
                                                                         'group': group_name_full}
+
+            elif len(groups) > 0:
+                groups_config_all = []
+                for group in groups_config:
+                    groups_config_parts = {
+                        'group': [group],
+                    }
+                    if 'BROWSERS' in groups_config[group] and len(groups_config[group]['BROWSERS']) > 0:
+                        groups_config_parts['browser'] = groups_config[group]['BROWSERS']
+                    if 'ENVS' in groups_config[group] and len(groups_config[group]['ENVS']) > 0:
+                        groups_config_parts['test_env'] = groups_config[group]['ENVS']
+
+                    groups_config_cartesian_prod = self.product_dict(**groups_config_parts)
+                    groups_config_all += list(groups_config_cartesian_prod)
+
+                for group_config in groups_config_all:
+                    group_name = group_config['group']
+                    group_name_full = 'parallel_group_%s' % (group_config['group'])
+                    codecept_command_env = ''
+                    browser = ''
+                    if 'browser' in group_config:
+                        browser = group_config['browser']
+                        group_name_full += '_%s' % browser
+                    if 'test_env' in group_config:
+                        group_name_full += '_%s' % group_config['test_env']
+                        test_env = group_config['test_env']
+                        if browser:
+                            test_env = '%s_%s' % (browser, test_env)
+                        codecept_command_env = ' --env %s' % test_env
+
+                    codecept_command = 'run --group %s --html report_%s.html --xml report_%s.xml' % (
+                        group_name, group_name_full, group_name_full)
+                    codecept_command += codecept_command_env
+                    command_container_id = self.docker_codecept(codecept_command, parallel=True,
+                                                                group_name=group_name_full, browser=browser)
+                    command_containers_ids[command_container_id] = {'finished': False,
+                                                                    'group': group_name_full}
 
             else:
                 self.docker_robo(split_tests_command)
@@ -221,7 +264,7 @@ class BaseTests(object):
     def wait_for_all_containers_to_finish(self, command_containers_ids, check_interval=10, log_all=False):
         parallel_tests_finished = False
         while not parallel_tests_finished:
-            print "\n\nWaiting %s sec for next test status checking." % check_interval
+            print "\n\nWaiting %s sec for next test containers status checking." % check_interval
             time.sleep(check_interval)
             parallel_tests_finished = True
             for container_id in command_containers_ids:
@@ -239,8 +282,7 @@ class BaseTests(object):
                     command_containers_ids[container_id]['finished'] = True
                     print "Container %s finished right now %s" % (container_id, container_tests_info)
                 else:
-                    if log_all:
-                        print "Container %s still running %s" % (container_id, container_tests_info)
+                    print "Container %s still running %s" % (container_id, container_tests_info)
                     parallel_tests_finished = False
 
             if parallel_tests_finished:
