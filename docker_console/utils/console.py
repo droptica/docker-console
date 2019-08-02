@@ -76,9 +76,10 @@ def message(message, type=""):
     print (signs_length * "#") + bc['ENDC']
 
 
-def run(command, cwd=None, return_output=False):
+def run(command, cwd=None, return_output=False, print_message=True):
     try:
-        message('Run: "' + command + '"')
+        if print_message:
+            message('Run: "' + command + '"')
         if return_output:
             process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
             while True:

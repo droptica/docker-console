@@ -64,6 +64,9 @@ commands = {
     'test-parallel': [
         'tests.test_run_parallel'
     ],
+    'cleanup-tests': [
+        'tests.cleanup_tests'
+    ],
 
     'config-prepare': [
         'docker.config_prepare'
