@@ -1,4 +1,5 @@
-# Application that improves and speeds up web development process using Docker.
+#Application that improves and speeds up web development process using Docker.
+
 Authored in [Droptica](https://www.droptica.com)
 
 |
